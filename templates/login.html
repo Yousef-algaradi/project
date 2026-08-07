@@ -1,0 +1,24 @@
+<!-- templates/login.html -->
+{% extends "base.html" %}
+
+{% block title %}تسجيل الدخول{% endblock %}
+
+{% block help_title %}صفحة تسجيل الدخول{% endblock %}
+{% block help_content %}أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى لوحة التحكم.{% endblock %}
+{% block help_step %}إذا لم تملك حساباً، اختر "إنشاء حساب جديد" من القائمة المنسدلة.{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 40px auto; text-align: center;">
+    <h2>🔐 تسجيل الدخول</h2>
+    <form method="POST" action="{{ url_for('auth.login') }}" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+        <input type="email" name="email" placeholder="البريد الإلكتروني" required 
+               style="padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 1rem;">
+        <input type="password" name="password" placeholder="كلمة المرور" required 
+               style="padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 1rem;">
+        <button type="submit" class="btn" style="width: 100%;">دخول</button>
+    </form>
+    <p style="margin-top: 20px; color: var(--text-secondary);">
+        ليس لديك حساب؟ <a href="{{ url_for('auth.register_page') }}" style="color: var(--accent); font-weight: 600;">أنشئ حساباً</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+<!-- templates/index.html -->
+{% extends "base.html" %}
+
+{% block title %}الرئيسية - المستشار الأكاديمي{% endblock %}
+
+{% block help_title %}الصفحة الرئيسية{% endblock %}
+{% block help_content %}هذه هي نقطة البداية. يمكنك التعرف على المنصة وما تقدمه لخريجي الثانوية.{% endblock %}
+{% block help_step %}اطلع على الخدمات، ثم سجل دخولك أو أنشئ حساباً.{% endblock %}
+
+{% block content %}
+<div style="text-align: center; padding: 40px 0;">
+    <h1 style="font-size: 3rem; font-weight: 700; letter-spacing: -2px;">🎓 مستشارك الأكاديمي</h1>
+    <p style="font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin: 20px auto;">
+        منصة ذكية تساعدك في اختيار تخصصك الجامعي المناسب بناءً على درجاتك وميولك،
+        مع خارطة طريق مهنية واضحة.
+    </p>
+    
+    <!-- الاقتباسات المتحركة -->
+    <div id="quotes" style="background: var(--bg-card); padding: 30px; border-radius: var(--radius); margin: 30px 0; min-height: 100px; display: flex; align-items: center; justify-content: center; font-style: italic; font-size: 1.3rem; border: 1px solid var(--border-color); box-shadow: var(--shadow);">
+        "التعليم هو أقوى سلاح يمكنك استخدامه لتغيير العالم."
+    </div>
+
+    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('auth.login_page') }}" class="btn"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</a>
+        <a href="{{ url_for('auth.register_page') }}" class="btn btn-outline"><i class="fas fa-user-plus"></i> إنشاء حساب</a>
+    </div>
+    <p style="margin-top: 20px; color: var(--text-secondary); font-size: 0.9rem;">✨ جرب كمستخدم تجريبي عبر أيقونة الحساب في الأعلى</p>
+</div>
+
+<script>
+    // حركة الاقتباسات (Motion)
+    const quotes = [
+        '"التعليم هو أقوى سلاح يمكنك استخدامه لتغيير العالم." - نيلسون مانديلا',
+        '"المستقبل ملك لأولئك الذين يعدّون له اليوم." - مالكوم إكس',
+        '"اختر تخصصاً تحبه، ولن تعمل يوماً واحداً في حياتك." - كونفوشيوس',
+        '"النجاح ليس نهائياً، والفشل ليس قاتلاً، بل الشجاعة للاستمرار هي ما يهم." - ونستون تشرشل'
+    ];
+    let idx = 0;
+    setInterval(() => {
+        idx = (idx + 1) % quotes.length;
+        document.getElementById('quotes').innerHTML = quotes[idx];
+    }, 4000);
+</script>
+{% endblock %}

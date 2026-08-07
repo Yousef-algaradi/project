@@ -1,0 +1,283 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}لوحة التحكم{% endblock %}
+
+{% block help_title %}لوحة التحكم المتقدمة{% endblock %}
+{% block help_content %}هنا تعرض أفضل 3 تخصصات مناسبة لك مع مخططات التوافق.{% endblock %}
+{% block help_step %}اختر التبويب المناسب، وانقر على أي تخصص لاستعراض تفاصيله الكاملة.{% endblock %}
+
+{% block content %}
+<div class="tab-bar-horizontal">
+    <div class="tab-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+        <i class="fas fa-home"></i>
+        <span>الرئيسية</span>
+        <div class="tab-indicator"></div>
+    </div>
+    <div class="tab-item" data-tab="recommendations" onclick="switchTab('recommendations')">
+        <i class="fas fa-lightbulb"></i>
+        <span>التوصيات</span>
+        <div class="tab-indicator"></div>
+    </div>
+    <a href="{{ url_for('student.profile') }}" class="tab-item" data-tab="profile" style="text-decoration: none; color: inherit;">
+        <i class="fas fa-user-cog"></i>
+        <span>بياناتي</span>
+        <div class="tab-indicator"></div>
+    </a>
+</div>
+
+<div class="tab-content-wrapper">
+    <div id="tab-dashboard" class="tab-pane active">
+        <div class="dashboard-hero">
+            <div class="hero-text">
+                <h1>👋 مرحباً {{ user.name }}</h1>
+                <p style="color: var(--text-secondary); font-size: 1.1rem;">
+                    أفضل {{ recommendations|length if recommendations|length < 3 else 3 }} تخصصات مناسبة لك
+                </p>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span class="stat-number">{{ recommendations|length if recommendations|length < 3 else 3 }}</span>
+                    <span class="stat-label">أفضل التوصيات</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">
+                        {% if recommendations %}
+                            {{ recommendations[0].match_percentage }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </span>
+                    <span class="stat-label">أفضل توافق</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number">
+                        {% set total_jobs = 0 %}
+                        {% for rec in recommendations[:3] %}
+                            {% set career_paths = rec.career_paths_list %}
+                            {% set total_jobs = total_jobs + career_paths|length %}
+                        {% endfor %}
+                        {{ total_jobs }}
+                    </span>
+                    <span class="stat-label">وظائف مستقبلية</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+            <a href="{{ url_for('student.profile') }}" class="btn btn-outline" style="padding: 14px 32px; font-size: 1.1rem;">
+                <i class="fas fa-edit"></i> تعديل بيانات الثانوية
+            </a>
+            <a href="{{ url_for('student.analyze') }}" class="btn" style="padding: 14px 32px; font-size: 1.1rem;">
+                <i class="fas fa-sync-alt"></i> إعادة التحليل
+            </a>
+        </div>
+    </div>
+
+    <div id="tab-recommendations" class="tab-pane">
+        <h2 style="margin-bottom: 20px;">💡 أفضل 3 تخصصات مقترحة لك</h2>
+        {% if recommendations %}
+            {% set top_recommendations = recommendations[:3] %}
+            {% for rec in top_recommendations %}
+            {% set career_paths = rec.career_paths_list %}
+            <div class="major-card-full">
+                <div class="major-card-header" onclick="toggleMajorCard(this)">
+                    <div class="major-title-section">
+                        <h2>{{ rec.major_title }}</h2>
+                        <div class="match-badge">
+                            <span class="match-number">{{ rec.match_percentage }}%</span>
+                            <span class="match-label">مطابقة</span>
+                        </div>
+                    </div>
+                    <div class="major-toggle">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+
+                <div class="major-card-body">
+                    <div class="reason-box">
+                        <i class="fas fa-robot"></i>
+                        <p>{{ rec.reason }}</p>
+                    </div>
+
+
+                    <div class="career-table-section">
+                        <h4>🚀 المسارات المهنية المقترحة</h4>
+                        {% if career_paths %}
+                        <div class="career-grid">
+                            {% for job in career_paths %}
+                            <div class="career-card">
+                                <div class="career-header">
+                                    <span class="career-icon">💼</span>
+                                    <h5>{{ job.title }}</h5>
+                                </div>
+                                <div class="career-body">
+                                    <p><strong>📝 الوصف:</strong> {{ job.description }}</p>
+                                    <div class="career-details-grid">
+                                        <div class="detail-item">
+                                            <span class="detail-icon">💰</span>
+                                            <div>
+                                                <strong>الراتب التقريبي</strong>
+                                                <span>{{ job.salary }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="detail-icon">🛠️</span>
+                                            <div>
+                                                <strong>المهارات المطلوبة</strong>
+                                                <span>{{ job.skills | join(' • ') }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="detail-item full-width">
+                                            <span class="detail-icon">🌟</span>
+                                            <div>
+                                                <strong>المميزات</strong>
+                                                <span>{{ job.benefits }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p style="color: var(--text-secondary);">📭 لا توجد مسارات مهنية متاحة لهذا التخصص حالياً.</p>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">تأكد من إكمال اختبار الميول للحصول على توصيات أكثر دقة.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% if recommendations|length > 3 %}
+            <div style="text-align: center; margin-top: 20px; padding: 15px; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border-color);">
+                <p style="color: var(--text-secondary);">
+                    <i class="fas fa-info-circle"></i>
+                    هناك {{ recommendations|length - 3 }} تخصصات أخرى مناسبة لك. 
+                    <a href="#" onclick="showAllRecommendations(); return false;" style="color: var(--accent); font-weight: 600;">عرض الكل</a>
+                </p>
+            </div>
+            <div id="extra-recommendations" style="display: none;">
+                {% for rec in recommendations[3:] %}
+                {% set career_paths = rec.career_paths_list %}                <div class="major-card-full">
+                    <div class="major-card-header" onclick="toggleMajorCard(this)">
+                        <div class="major-title-section">
+                            <h2>{{ rec.major_title }}</h2>
+                            <div class="match-badge">
+                                <span class="match-number">{{ rec.match_percentage }}%</span>
+                                <span class="match-label">مطابقة</span>
+                            </div>
+                        </div>
+                        <div class="major-toggle">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+
+                    <div class="major-card-body">
+                        <div class="reason-box">
+                            <i class="fas fa-robot"></i>
+                            <p>{{ rec.reason }}</p>
+                        </div>
+
+                      
+
+                        <div class="career-table-section">
+                            <h4>🚀 المسارات المهنية المقترحة</h4>
+                            {% if career_paths %}
+                            <div class="career-grid">
+                                {% for job in career_paths %}
+                                <div class="career-card">
+                                    <div class="career-header">
+                                        <span class="career-icon">💼</span>
+                                        <h5>{{ job.title }}</h5>
+                                    </div>
+                                    <div class="career-body">
+                                        <p><strong>📝 الوصف:</strong> {{ job.description }}</p>
+                                        <div class="career-details-grid">
+                                            <div class="detail-item">
+                                                <span class="detail-icon">💰</span>
+                                                <div>
+                                                    <strong>الراتب التقريبي</strong>
+                                                    <span>{{ job.salary }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <span class="detail-icon">🛠️</span>
+                                                <div>
+                                                    <strong>المهارات المطلوبة</strong>
+                                                    <span>{{ job.skills | join(' • ') }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item full-width">
+                                                <span class="detail-icon">🌟</span>
+                                                <div>
+                                                    <strong>المميزات</strong>
+                                                    <span>{{ job.benefits }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p style="color: var(--text-secondary);">📭 لا توجد مسارات مهنية متاحة لهذا التخصص حالياً.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search" style="font-size: 3rem; color: var(--text-secondary);"></i>
+                <p style="font-size: 1.2rem;">لا توجد توصيات حالياً.</p>
+                <p style="color: var(--text-secondary);">يرجى <a href="{{ url_for('student.analyze') }}" style="color: var(--accent); font-weight: 600;">تشغيل المحلل الأكاديمي</a> أولاً.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.tab-item[data-tab="${tabId}"]`).classList.add('active');
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+    }
+
+    function toggleMajorCard(headerElement) {
+        const card = headerElement.closest('.major-card-full');
+        const body = card.querySelector('.major-card-body');
+        const icon = card.querySelector('.major-toggle i');
+        
+        if (body.style.display === 'none' || body.style.display === '') {
+            body.style.display = 'block';
+            icon.style.transform = 'rotate(180deg)';
+
+        } else {
+            body.style.display = 'none';
+            icon.style.transform = 'rotate(0deg)';
+        }
+    }
+
+   
+
+    function showAllRecommendations() {
+        document.getElementById('extra-recommendations').style.display = 'block';
+       
+        event.target.parentElement.parentElement.style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstCard = document.querySelector('.major-card-full');
+        if (firstCard) {
+            const header = firstCard.querySelector('.major-card-header');
+            if (header) {
+                toggleMajorCard(header);
+            }
+        }
+    });
+</script>
+{% endblock %}
