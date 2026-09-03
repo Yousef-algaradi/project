@@ -1,89 +1,189 @@
 // static/js/main.js
 
-// 1. تبديل الثيم
-function toggleTheme() {
-    const html = document.documentElement;
-    const current = html.getAttribute('data-theme');
-    const newTheme = current === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-}
+(function () {
+    'use strict';
 
-// استعادة الثيم المخزن
-document.addEventListener('DOMContentLoaded', () => {
-    const saved = localStorage.getItem('theme');
-    if (saved) document.documentElement.setAttribute('data-theme', saved);
-});
+    // ========== Theme ==========
+    window.toggleTheme = function () {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        const newTheme = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeIcon(newTheme);
+    };
 
-// 2. تبديل اللغة
-let currentLang = 'ar';
-function toggleLanguage() {
-    const html = document.documentElement;
-    if (currentLang === 'ar') {
-        html.setAttribute('dir', 'ltr');
-        html.setAttribute('lang', 'en');
-        currentLang = 'en';
-        document.querySelector('.logo').innerText = '🎓 Academic Advisor';
-    } else {
-        html.setAttribute('dir', 'rtl');
-        html.setAttribute('lang', 'ar');
-        currentLang = 'ar';
-        document.querySelector('.logo').innerText = '🎓 المستشار الأكاديمي';
+    function initTheme() {
+        const saved = localStorage.getItem('theme');
+        const theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+        updateThemeIcon(theme);
     }
-}
 
-// 3. قائمة الحساب
-function toggleAccountMenu() {
-    document.getElementById('accountDropdown').classList.toggle('show');
-}
-window.onclick = function(event) {
-    if (!event.target.closest('.account-menu')) {
-        const dropdowns = document.getElementsByClassName('dropdown-content');
-        for (let d of dropdowns) { d.classList.remove('show'); }
+    function updateThemeIcon(theme) {
+        const icon = document.querySelector('.navbar .icon-btn i.fa-moon, .navbar .icon-btn i.fa-sun');
+        if (icon) {
+            if (theme === 'dark') {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+        }
     }
-}
 
-// 4. البطاقات القابلة للطي (للتوافق مع البطاقات القديمة)
-function toggleCard(headerElement) {
-    const card = headerElement.closest('.card');
-    if (card) {
+    // ========== Language ==========
+    let currentLang = localStorage.getItem('lang') || 'ar';
+
+    window.toggleLanguage = function () {
+        const html = document.documentElement;
+        const logo = document.querySelector('.logo');
+        if (currentLang === 'ar') {
+            html.setAttribute('dir', 'ltr');
+            html.setAttribute('lang', 'en');
+            currentLang = 'en';
+            if (logo) logo.innerHTML = '<i class="fas fa-graduation-cap logo-icon"></i><span>Academic Advisor</span>';
+        } else {
+            html.setAttribute('dir', 'rtl');
+            html.setAttribute('lang', 'ar');
+            currentLang = 'ar';
+            if (logo) logo.innerHTML = '<i class="fas fa-graduation-cap logo-icon"></i><span>المستشار الأكاديمي</span>';
+        }
+        localStorage.setItem('lang', currentLang);
+    };
+
+    function initLanguage() {
+        const saved = localStorage.getItem('lang');
+        if (saved === 'en') {
+            currentLang = 'en';
+            document.documentElement.setAttribute('dir', 'ltr');
+            document.documentElement.setAttribute('lang', 'en');
+            const logo = document.querySelector('.logo');
+            if (logo) logo.innerHTML = '<i class="fas fa-graduation-cap logo-icon"></i><span>Academic Advisor</span>';
+        } else {
+            currentLang = 'ar';
+            document.documentElement.setAttribute('dir', 'rtl');
+            document.documentElement.setAttribute('lang', 'ar');
+        }
+    }
+
+    // ========== Account Dropdown ==========
+    window.toggleAccountMenu = function () {
+        const dropdown = document.getElementById('accountDropdown');
+        if (dropdown) dropdown.classList.toggle('show');
+    };
+
+    function closeDropdownOnOutsideClick(event) {
+        if (!event.target.closest('.account-menu')) {
+            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+        }
+    }
+
+    function closeDropdownOnEscape(event) {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show'));
+        }
+    }
+
+    // ========== Collapsible Cards ==========
+    window.toggleCard = function (headerElement) {
+        const card = headerElement.closest('.card, .major-card-full');
+        if (!card) return;
         const body = card.querySelector('.card-body');
         const icon = card.querySelector('.toggle-icon');
         if (body) {
             body.classList.toggle('collapsed');
             if (icon) icon.classList.toggle('open');
         }
-    }
-}
+    };
 
-// 5. لوحة المساعدة
-function toggleHelp() {
-    document.getElementById('helpPanel').classList.toggle('open');
-}
+    // ========== Help Panel ==========
+    window.toggleHelp = function () {
+        const panel = document.getElementById('helpPanel');
+        if (panel) panel.classList.toggle('open');
+    };
 
-// 6. دالة الـ Toast (يمكن استدعاؤها من أي مكان)
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    if (!container) {
-        // إذا لم توجد الحاوية، ننشئها
-        const newContainer = document.createElement('div');
-        newContainer.id = 'toast-container';
-        document.body.appendChild(newContainer);
-        return showToast(message, type);
-    }
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-        <span>${message}</span>
-        <button onclick="this.parentElement.remove()">&times;</button>
-    `;
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        if (toast.parentElement) {
-            toast.style.opacity = '0';
-            toast.style.transform = 'translateY(20px)';
-            setTimeout(() => toast.remove(), 300);
+    function closeHelpOnEscape(event) {
+        if (event.key === 'Escape') {
+            const panel = document.getElementById('helpPanel');
+            if (panel && panel.classList.contains('open')) panel.classList.remove('open');
         }
-    }, 4500);
-}
+    }
+
+    // ========== Toast System ==========
+    window.showToast = function (message, type = 'info') {
+        const allowedTypes = ['success', 'danger', 'warning', 'info'];
+        if (!allowedTypes.includes(type)) type = 'info';
+
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.setAttribute('aria-live', 'polite');
+            container.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.setAttribute('role', 'alert');
+
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = message;
+        toast.appendChild(messageSpan);
+
+        const closeButton = document.createElement('button');
+        closeButton.setAttribute('aria-label', 'إغلاق');
+        closeButton.innerHTML = '&times;';
+        closeButton.addEventListener('click', () => dismissToast(toast));
+        toast.appendChild(closeButton);
+
+        container.appendChild(toast);
+
+        setTimeout(() => dismissToast(toast), 4500);
+    };
+
+    function dismissToast(toast) {
+        if (!toast.parentElement) return;
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            if (toast.parentElement) toast.remove();
+        }, 300);
+    }
+
+    // ========== Init ==========
+    function init() {
+        initTheme();
+        initLanguage();
+        document.addEventListener('click', closeDropdownOnOutsideClick);
+        document.addEventListener('keydown', closeDropdownOnEscape);
+        document.addEventListener('keydown', closeHelpOnEscape);
+
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        if (mobileToggle && !mobileToggle.dataset.listenerAttached) {
+            const navbarActions = document.getElementById('navbarActions');
+            if (navbarActions) {
+                mobileToggle.addEventListener('click', () => {
+                    const expanded = mobileToggle.getAttribute('aria-expanded') === 'true' ? 'false' : 'true';
+                    mobileToggle.setAttribute('aria-expanded', expanded);
+                    navbarActions.classList.toggle('active');
+                });
+                document.addEventListener('click', (event) => {
+                    if (!navbarActions.contains(event.target) && event.target !== mobileToggle) {
+                        mobileToggle.setAttribute('aria-expanded', 'false');
+                        navbarActions.classList.remove('active');
+                    }
+                });
+                mobileToggle.dataset.listenerAttached = 'true';
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();

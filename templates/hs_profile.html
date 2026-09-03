@@ -1,174 +1,498 @@
 <!-- templates/hs_profile.html -->
 {% extends "base.html" %}
 
-{% block title %}بيانات الثانوية{% endblock %}
+{% block title %}بيانات الثانوية - المستشار الأكاديمي{% endblock %}
 
 {% block help_title %}بيانات خريج الثانوية{% endblock %}
 {% block help_content %}أدخل درجاتك في جميع المواد (رياضيات، فيزياء، كيمياء، أحياء، إنجليزية) واختر اهتماماتك.{% endblock %}
 {% block help_step %}املأ الجدول، اختر اهتماماتك، ثم اضغط "حفظ البيانات"، وبعدها "تشغيل المحلل الأكاديمي".{% endblock %}
 
 {% block content %}
-<div style="max-width: 700px; margin: 0 auto;">
-    <h2>📊 بيانات خريج الثانوية</h2>
-    <p style="color: var(--text-secondary); margin-bottom: 20px;">أدخل بياناتك بدقة للحصول على أفضل التوصيات.</p>
-    
-    <form method="POST" action="{{ url_for('student.profile') }}" id="hsForm" onsubmit="return handleFormSubmit(event)">
+<div class="profile-container">
+    <header class="profile-header">
+        <h1>📊 بيانات خريج الثانوية</h1>
+        <p>أدخل بياناتك بدقة للحصول على أفضل التوصيات.</p>
+    </header>
+
+    <form method="POST" action="{{ url_for('student.profile') }}" id="hsForm" class="profile-form" novalidate>
+        <!-- Hidden branch field -->
         <input type="hidden" name="branch" value="علمي">
-        
-        <div style="margin-bottom: 15px;">
-            <label style="font-weight: 600;">النسبة المئوية (٪):</label>
-            <input type="text" id="overall_percentage" name="overall_percentage" 
-                   placeholder="مثال: 88.5 أو ٨٨.٥" 
-                   value="{{ user.high_school_profile.overall_percentage if user.high_school_profile else '' }}"
-                   style="width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 1rem; margin-top: 5px;">
-        </div>
 
-        <!-- جدول المواد الخمسة -->
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <thead>
-                <tr style="background: var(--bg-primary); border-radius: 12px;">
-                    <th style="padding: 10px; text-align: right;">المادة</th>
-                    <th style="padding: 10px; text-align: center;">الدرجة (من 100)</th>
-                </tr>
-            </thead>
-            <tbody id="subjectsTable">
-                <tr>
-                    <td style="padding: 8px;">📐 رياضيات</td>
-                    <td style="padding: 8px;">
-                        <input type="number" name="subject_math" min="0" max="100" 
-                               value="{{ subject_grades.math if subject_grades else '' }}"
-                               style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); text-align: center;">
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;">⚡ فيزياء</td>
-                    <td style="padding: 8px;">
-                        <input type="number" name="subject_physics" min="0" max="100" 
-                               value="{{ subject_grades.physics if subject_grades else '' }}"
-                               style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); text-align: center;">
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;">🧪 كيمياء</td>
-                    <td style="padding: 8px;">
-                        <input type="number" name="subject_chemistry" min="0" max="100" 
-                               value="{{ subject_grades.chemistry if subject_grades else '' }}"
-                               style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); text-align: center;">
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;">🧬 أحياء</td>
-                    <td style="padding: 8px;">
-                        <input type="number" name="subject_biology" min="0" max="100" 
-                               value="{{ subject_grades.biology if subject_grades else '' }}"
-                               style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); text-align: center;">
-                    </td>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;">🇬🇧 لغة إنجليزية</td>
-                    <td style="padding: 8px;">
-                        <input type="number" name="subject_english" min="0" max="100" 
-                               value="{{ subject_grades.english if subject_grades else '' }}"
-                               style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); text-align: center;">
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="button" onclick="addSubjectRow()" class="btn btn-outline" style="margin-bottom: 20px;">➕ إضافة مادة</button>
-
-        <!-- الاهتمامات بصيغة Checkboxes -->
-        <div style="margin-bottom: 20px;">
-            <label style="font-weight: 600; display: block; margin-bottom: 10px;">اختر اهتماماتك (يمكنك اختيار أكثر من واحد):</label>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; background: var(--bg-primary); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border-color);">
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="برمجة" {% if 'برمجة' in selected_interests %}checked{% endif %}> 💻 برمجة
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="حاسوب" {% if 'حاسوب' in selected_interests %}checked{% endif %}> 🖥️ حاسوب
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="شبكات" {% if 'شبكات' in selected_interests %}checked{% endif %}> 🌐 شبكات
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="أمن سيبراني" {% if 'أمن سيبراني' in selected_interests %}checked{% endif %}> 🔒 أمن سيبراني
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="ذكاء اصطناعي" {% if 'ذكاء اصطناعي' in selected_interests %}checked{% endif %}> 🤖 ذكاء اصطناعي
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="تطوير ويب" {% if 'تطوير ويب' in selected_interests %}checked{% endif %}> 🌍 تطوير ويب
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="تحليل بيانات" {% if 'تحليل بيانات' in selected_interests %}checked{% endif %}> 📊 تحليل بيانات
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="طب" {% if 'طب' in selected_interests %}checked{% endif %}> 🏥 طب
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="هندسة" {% if 'هندسة' in selected_interests %}checked{% endif %}> 🏗️ هندسة
-                </label>
-                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
-                    <input type="checkbox" name="interests" value="إدارة أعمال" {% if 'إدارة أعمال' in selected_interests %}checked{% endif %}> 💼 إدارة أعمال
-                </label>
+        <!-- Section 1: النسبة المئوية -->
+        <section class="form-section" aria-labelledby="percentage-heading">
+            <h2 id="percentage-heading" class="section-title">النسبة المئوية</h2>
+            <div class="form-group">
+                <label for="overall_percentage">النسبة المئوية الإجمالية (٪)</label>
+                <input type="text" id="overall_percentage" name="overall_percentage" 
+                       placeholder="مثال: 88.5 أو ٨٨.٥" 
+                       value="{{ user.high_school_profile.overall_percentage if user.high_school_profile else '' }}"
+                       inputmode="decimal"
+                       aria-describedby="percentage-help"
+                       required>
+                <small id="percentage-help" class="helper-text">أدخل النسبة من 0 إلى 100</small>
+                <div class="error-message" id="percentage-error"></div>
             </div>
-            <small style="color: var(--text-secondary); display: block; margin-top: 8px;">✓ اختر كل ما يناسبك، يمكنك اختيار أكثر من اهتمام.</small>
-        </div>
+        </section>
 
-        <button type="submit" class="btn" style="width: 100%;">💾 حفظ البيانات</button>
+        <!-- Section 2: درجات المواد الأساسية -->
+        <section class="form-section" aria-labelledby="grades-heading">
+            <h2 id="grades-heading" class="section-title">درجات المواد الأساسية</h2>
+            <div class="table-responsive">
+                <table class="subjects-table" aria-label="جدول درجات المواد">
+                    <thead>
+                        <tr>
+                            <th scope="col">المادة</th>
+                            <th scope="col" class="grade-col">الدرجة (من 100)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectsTable">
+                        <tr>
+                            <td><label for="subject_math">📐 رياضيات</label></td>
+                            <td>
+                                <input type="number" id="subject_math" name="subject_math" min="0" max="100" 
+                                       value="{{ subject_grades.math if subject_grades else '' }}"
+                                       placeholder="0-100"
+                                       class="grade-input"
+                                       required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="subject_physics">⚡ فيزياء</label></td>
+                            <td>
+                                <input type="number" id="subject_physics" name="subject_physics" min="0" max="100" 
+                                       value="{{ subject_grades.physics if subject_grades else '' }}"
+                                       placeholder="0-100"
+                                       class="grade-input"
+                                       required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="subject_chemistry">🧪 كيمياء</label></td>
+                            <td>
+                                <input type="number" id="subject_chemistry" name="subject_chemistry" min="0" max="100" 
+                                       value="{{ subject_grades.chemistry if subject_grades else '' }}"
+                                       placeholder="0-100"
+                                       class="grade-input"
+                                       required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="subject_biology">🧬 أحياء</label></td>
+                            <td>
+                                <input type="number" id="subject_biology" name="subject_biology" min="0" max="100" 
+                                       value="{{ subject_grades.biology if subject_grades else '' }}"
+                                       placeholder="0-100"
+                                       class="grade-input"
+                                       required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><label for="subject_english">🇬🇧 لغة إنجليزية</label></td>
+                            <td>
+                                <input type="number" id="subject_english" name="subject_english" min="0" max="100" 
+                                       value="{{ subject_grades.english if subject_grades else '' }}"
+                                       placeholder="0-100"
+                                       class="grade-input"
+                                       required>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="addSubjectRow()" aria-label="إضافة مادة جديدة">
+                ➕ إضافة مادة اختيارية
+            </button>
+            <div class="error-message" id="grades-error"></div>
+        </section>
+
+        <!-- Section 3: الاهتمامات -->
+        <section class="form-section" aria-labelledby="interests-heading">
+            <h2 id="interests-heading" class="section-title">الاهتمامات والميول</h2>
+            <fieldset class="interests-fieldset">
+                <legend class="sr-only">اختر اهتماماتك</legend>
+                <div class="interests-grid">
+                    {% set interests_list = ['برمجة', 'حاسوب', 'شبكات', 'أمن سيبراني', 'ذكاء اصطناعي', 'تطوير ويب', 'تحليل بيانات', 'طب', 'هندسة', 'إدارة أعمال'] %}
+                    {% for interest in interests_list %}
+                    <label class="interest-option">
+                        <input type="checkbox" name="interests" value="{{ interest }}" 
+                               {% if interest in selected_interests %}checked{% endif %}>
+                        <span>{% if interest == 'برمجة' %}💻{% elif interest == 'حاسوب' %}🖥️{% elif interest == 'شبكات' %}🌐{% elif interest == 'أمن سيبراني' %}🔒{% elif interest == 'ذكاء اصطناعي' %}🤖{% elif interest == 'تطوير ويب' %}🌍{% elif interest == 'تحليل بيانات' %}📊{% elif interest == 'طب' %}🏥{% elif interest == 'هندسة' %}🏗️{% else %}💼{% endif %} {{ interest }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <small class="helper-text">✓ يمكنك اختيار أكثر من اهتمام</small>
+            </fieldset>
+            <div class="error-message" id="interests-error"></div>
+        </section>
+
+        <!-- أزرار الإجراءات -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">
+                <span class="btn-text">💾 حفظ البيانات</span>
+                <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin"></i></span>
+            </button>
+        </div>
     </form>
 
-    <hr style="margin: 30px 0; border-color: var(--border-color);">
-    
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
-        <a href="{{ url_for('dashboard.home') }}" class="btn btn-outline"><i class="fas fa-arrow-right"></i> العودة للوحة التحكم</a>
-        <a href="{{ url_for('student.analyze') }}" class="btn"><i class="fas fa-robot"></i> 🤖 تشغيل المحلل الأكاديمي</a>
+    <!-- قسم اختبار الميول ونتيجته -->
+    <section class="assessment-section" style="margin-top: 30px;">
+        {% if assessment_completed %}
+        <div class="assessment-result-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+            <h3 style="margin-bottom: 15px;">📋 نتيجة اختبار الميول:</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;">
+                {% for dim, score in assessment_scores.items() %}
+                <div style="background: var(--bg-elevated); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                    <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px;">{{ dim }}</div>
+                    <div style="font-size: 1.3rem; font-weight: 700; color: var(--accent);">{{ score }}%</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; margin: 20px 0;">
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">لم تقم بإجراء اختبار الميول بعد.</p>
+            <a href="{{ url_for('student.assessment') }}" class="btn btn-primary" style="padding: 12px 24px;">
+                <i class="fas fa-brain"></i> ابدأ اختبار الميول
+            </a>
+        </div>
+        {% endif %}
+    </section>
+
+    <hr class="divider">
+
+    <div class="secondary-actions">
+        <a href="{{ url_for('dashboard.home') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
+        </a>
+        <a href="{{ url_for('student.assessment') }}" class="btn btn-outline">
+            <i class="fas fa-brain"></i> اختبار الميول
+        </a>
+        <a href="{{ url_for('student.analyze') }}" class="btn btn-secondary">
+            <i class="fas fa-robot"></i> تشغيل المحلل الأكاديمي
+        </a>
     </div>
 </div>
 
-<script>
-    // تحويل الأرقام العربية إلى إنجليزية
-    document.getElementById('overall_percentage').addEventListener('input', function(e) {
-        let val = this.value;
-        const arabicNumbers = /[٠-٩]/g;
-        const englishMap = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
-        val = val.replace(arabicNumbers, function(m) { return englishMap[m]; });
-        this.value = val;
-    });
+<style>
+    /* تنسيقات صفحة بيانات الثانوية */
+    .profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 16px;
+    }
+    .profile-header {
+        margin-bottom: 24px;
+    }
+    .profile-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .profile-header p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+    .form-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow-sm);
+    }
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .form-group label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .form-group input[type="text"],
+    .form-group input[type="number"] {
+        padding: 10px 14px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    .helper-text {
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
+    .error-message {
+        color: var(--danger);
+        font-size: 0.8rem;
+        min-height: 18px;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .subjects-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 12px;
+    }
+    .subjects-table th,
+    .subjects-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border-color);
+        text-align: right;
+    }
+    .subjects-table th {
+        background: var(--bg-elevated);
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+    .subjects-table td:first-child {
+        font-weight: 500;
+    }
+    .grade-col {
+        text-align: center;
+        width: 120px;
+    }
+    .grade-input {
+        width: 100%;
+        padding: 6px 8px;
+        text-align: center;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+    }
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+    .interests-fieldset {
+        border: none;
+        padding: 0;
+    }
+    .interests-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 10px;
+        margin-bottom: 8px;
+    }
+    .interest-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        background: var(--bg-elevated);
+        cursor: pointer;
+        transition: background var(--transition-fast), border-color var(--transition-fast);
+        font-size: 0.9rem;
+    }
+    .interest-option:hover {
+        background: var(--surface-hover);
+        border-color: var(--text-muted);
+    }
+    .interest-option input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+    }
+    .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        white-space: nowrap;
+        border: 0;
+    }
+    .form-actions {
+        margin-top: 24px;
+    }
+    .btn-lg {
+        width: 100%;
+        padding: 14px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .btn-loader {
+        display: inline-flex;
+        align-items: center;
+    }
+    .divider {
+        margin: 32px 0;
+        border: none;
+        border-top: 1px solid var(--border-color);
+    }
+    .secondary-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+    }
+    .btn-secondary {
+        background-color: var(--surface-hover);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+    }
+    .btn-secondary:hover {
+        background-color: var(--bg-elevated);
+    }
 
-    function addSubjectRow() {
+    /* Responsive */
+    @media (max-width: 600px) {
+        .subjects-table th,
+        .subjects-table td {
+            padding: 6px;
+            font-size: 0.9rem;
+        }
+        .grade-col {
+            width: 90px;
+        }
+        .interests-grid {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+    }
+</style>
+
+<script>
+(function() {
+    // تحويل الأرقام العربية إلى إنجليزية في حقل النسبة المئوية
+    const percentageInput = document.getElementById('overall_percentage');
+    if (percentageInput) {
+        percentageInput.addEventListener('input', function() {
+            const arabicNumbers = /[٠-٩]/g;
+            const englishMap = {'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
+            this.value = this.value.replace(arabicNumbers, m => englishMap[m]);
+        });
+    }
+
+    // إضافة صف مادة جديد
+    window.addSubjectRow = function() {
         const table = document.getElementById('subjectsTable');
+        if (!table) return;
         const row = table.insertRow();
         const cell1 = row.insertCell(0);
         const cell2 = row.insertCell(1);
-        cell1.style.padding = '8px';
-        cell2.style.padding = '8px';
-        cell1.innerHTML = `<input type="text" name="subject_name" placeholder="اسم المادة" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary);">`;
-        cell2.innerHTML = `<input type="number" name="subject_grade" min="0" max="100" placeholder="الدرجة" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-primary); color:var(--text-primary); text-align:center;">`;
-    }
+        cell1.innerHTML = `<input type="text" name="subject_name" placeholder="اسم المادة" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-elevated); color:var(--text-primary);">`;
+        cell2.innerHTML = `<input type="number" name="subject_grade" min="0" max="100" placeholder="0-100" style="width:100%; padding:6px 8px; text-align:center; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-elevated); color:var(--text-primary);">`;
+    };
 
-    function handleFormSubmit(event) {
-        event.preventDefault();
-        const form = event.target;
-        const formData = new FormData(form);
-        
-        fetch(form.action, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => {
-            if (response.redirected) {
-                showToast('✅ تم حفظ بيانات الثانوية بنجاح!', 'success');
-                setTimeout(() => {
-                    window.location.href = response.url;
-                }, 1500);
-            } else {
-                showToast('❌ حدث خطأ، حاول مرة أخرى.', 'danger');
+    // التحقق من صحة النموذج قبل الإرسال
+    const form = document.getElementById('hsForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            let valid = true;
+
+            // التحقق من النسبة المئوية
+            const percentage = document.getElementById('overall_percentage');
+            const percentageError = document.getElementById('percentage-error');
+            if (percentage && percentageError) {
+                const value = parseFloat(percentage.value);
+                if (isNaN(value) || value < 0 || value > 100) {
+                    percentageError.textContent = 'يرجى إدخال نسبة مئوية صحيحة بين 0 و 100';
+                    valid = false;
+                } else {
+                    percentageError.textContent = '';
+                }
             }
-        })
-        .catch(error => {
-            showToast('❌ خطأ في الاتصال بالخادم.', 'danger');
+
+            // التحقق من درجات المواد
+            const gradeInputs = document.querySelectorAll('#subjectsTable input[type="number"]');
+            const gradesError = document.getElementById('grades-error');
+            if (gradeInputs.length > 0 && gradesError) {
+                for (const input of gradeInputs) {
+                    const val = parseFloat(input.value);
+                    if (isNaN(val) || val < 0 || val > 100) {
+                        gradesError.textContent = 'جميع الدرجات يجب أن تكون بين 0 و 100';
+                        valid = false;
+                        break;
+                    }
+                }
+                if (valid) gradesError.textContent = '';
+            }
+
+            // التحقق من اختيار اهتمام واحد على الأقل
+            const interestsChecked = document.querySelectorAll('input[name="interests"]:checked');
+            const interestsError = document.getElementById('interests-error');
+            if (interestsError) {
+                if (interestsChecked.length === 0) {
+                    interestsError.textContent = 'يرجى اختيار اهتمام واحد على الأقل';
+                    valid = false;
+                } else {
+                    interestsError.textContent = '';
+                }
+            }
+
+            if (!valid) return;
+
+            // عرض حالة التحميل ومنع الإرسال المزدوج
+            const btnText = form.querySelector('.btn-text');
+            const btnLoader = form.querySelector('.btn-loader');
+            const submitBtn = document.getElementById('saveBtn');
+            if (btnText && btnLoader && submitBtn) {
+                btnText.style.display = 'none';
+                btnLoader.style.display = 'inline-flex';
+                submitBtn.disabled = true;
+            }
+
+            // إرسال النموذج يدويًا (مع إمكانية إعادة التوجيه بعد النجاح)
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => {
+                if (response.redirected) {
+                    showToast('✅ تم حفظ بيانات الثانوية بنجاح!', 'success');
+                    setTimeout(() => {
+                        window.location.href = response.url;
+                    }, 1500);
+                } else if (response.ok) {
+                    showToast('✅ تم الحفظ بنجاح', 'success');
+                    if (btnText && btnLoader && submitBtn) {
+                        btnText.style.display = 'inline';
+                        btnLoader.style.display = 'none';
+                        submitBtn.disabled = false;
+                    }
+                } else {
+                    showToast('❌ حدث خطأ، حاول مرة أخرى.', 'danger');
+                    if (btnText && btnLoader && submitBtn) {
+                        btnText.style.display = 'inline';
+                        btnLoader.style.display = 'none';
+                        submitBtn.disabled = false;
+                    }
+                }
+            })
+            .catch(error => {
+                showToast('❌ خطأ في الاتصال بالخادم.', 'danger');
+                if (btnText && btnLoader && submitBtn) {
+                    btnText.style.display = 'inline';
+                    btnLoader.style.display = 'none';
+                    submitBtn.disabled = false;
+                }
+            });
         });
-        return false;
     }
+})();
 </script>
 {% endblock %}

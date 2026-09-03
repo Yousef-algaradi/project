@@ -10,6 +10,18 @@ class AnalysisEngine:
             "min_percentage": 70.0,
             "key_subjects": ["math", "english"],
             "keywords": ["بيانات", "تحليل", "إحصاء", "برمجة", "رياضيات", "ذكاء اصطناعي"],
+            "aptitude_profile": {
+                "analytical": 0.9,
+                "technology": 0.8,
+                "research": 0.7,
+                "problem_solving": 0.8,
+                "practical": 0.5,
+                "creativity": 0.4,
+                "communication": 0.3,
+                "leadership": 0.2,
+                "health": 0.1,
+                "engineering": 0.2
+            },
             "career_paths": [
                 {
                     "title": "محلل بيانات (Data Analyst)",
@@ -40,6 +52,18 @@ class AnalysisEngine:
             "min_percentage": 75.0,
             "key_subjects": ["math", "english"],
             "keywords": ["ذكاء اصطناعي", "تعلم آلة", "روبوتات", "خوارزميات", "برمجة", "رياضيات"],
+            "aptitude_profile": {
+                "analytical": 0.95,
+                "technology": 0.9,
+                "research": 0.8,
+                "problem_solving": 0.85,
+                "practical": 0.6,
+                "creativity": 0.7,
+                "communication": 0.2,
+                "leadership": 0.1,
+                "health": 0.05,
+                "engineering": 0.4
+            },
             "career_paths": [
                 {
                     "title": "مهندس تعلم آلة (Machine Learning Engineer)",
@@ -70,6 +94,18 @@ class AnalysisEngine:
             "min_percentage": 70.0,
             "key_subjects": ["math", "english"],
             "keywords": ["أمن", "شبكات", "برمجة", "حماية", "اختراق", "سيبراني"],
+            "aptitude_profile": {
+                "analytical": 0.85,
+                "technology": 0.9,
+                "research": 0.6,
+                "problem_solving": 0.9,
+                "practical": 0.7,
+                "creativity": 0.3,
+                "communication": 0.2,
+                "leadership": 0.1,
+                "health": 0.05,
+                "engineering": 0.6
+            },
             "career_paths": [
                 {
                     "title": "محلل أمن سيبراني (Security Analyst)",
@@ -100,6 +136,18 @@ class AnalysisEngine:
             "min_percentage": 65.0,
             "key_subjects": ["math", "english"],
             "keywords": ["شبكات", "أنظمة", "قواعد بيانات", "برمجة", "حاسوب", "دعم فني"],
+            "aptitude_profile": {
+                "analytical": 0.75,
+                "technology": 0.85,
+                "research": 0.3,
+                "problem_solving": 0.8,
+                "practical": 0.8,
+                "creativity": 0.2,
+                "communication": 0.4,
+                "leadership": 0.2,
+                "health": 0.0,
+                "engineering": 0.6
+            },
             "career_paths": [
                 {
                     "title": "أخصائي دعم فني (IT Support Specialist)",
@@ -130,6 +178,18 @@ class AnalysisEngine:
             "min_percentage": 70.0,
             "key_subjects": ["math", "english"],
             "keywords": ["برمجة", "تطوير", "خوارزميات", "تصميم", "هندسة", "تطبيقات"],
+            "aptitude_profile": {
+                "analytical": 0.85,
+                "technology": 0.9,
+                "research": 0.4,
+                "problem_solving": 0.85,
+                "practical": 0.7,
+                "creativity": 0.5,
+                "communication": 0.3,
+                "leadership": 0.2,
+                "health": 0.0,
+                "engineering": 0.8
+            },
             "career_paths": [
                 {
                     "title": "مطور برمجيات (Software Developer)",
@@ -160,6 +220,18 @@ class AnalysisEngine:
             "min_percentage": 80.0,
             "key_subjects": ["biology", "chemistry", "english"],
             "keywords": ["طب", "صحة", "أحياء", "كيمياء", "علاج", "تشخيص", "إنسان", "مختبر"],
+            "aptitude_profile": {
+                "analytical": 0.6,
+                "technology": 0.3,
+                "research": 0.7,
+                "problem_solving": 0.7,
+                "practical": 0.6,
+                "creativity": 0.2,
+                "communication": 0.8,
+                "leadership": 0.4,
+                "health": 1.0,
+                "engineering": 0.1
+            },
             "career_paths": [
                 {
                     "title": "الطب البشري (Human Medicine)",
@@ -204,6 +276,18 @@ class AnalysisEngine:
             "min_percentage": 60.0,
             "key_subjects": ["math", "english"],
             "keywords": ["إدارة", "أعمال", "اقتصاد", "تجارة", "مال", "قيادة", "تسويق", "استثمار", "مشاريع"],
+            "aptitude_profile": {
+                "analytical": 0.6,
+                "technology": 0.2,
+                "research": 0.3,
+                "problem_solving": 0.6,
+                "practical": 0.5,
+                "creativity": 0.5,
+                "communication": 0.9,
+                "leadership": 0.9,
+                "health": 0.0,
+                "engineering": 0.1
+            },
             "career_paths": [
                 {
                     "title": "إدارة الأعمال (Business Administration)",
@@ -245,7 +329,14 @@ class AnalysisEngine:
     ]
 
     @staticmethod
-    def analyze_student(user_id, hs_profile):
+    def analyze_student(user_id, hs_profile, assessment_scores=None):
+        """
+        تحليل بيانات الطالب وإنتاج توصيات.
+        :param user_id: معرف المستخدم (غير مستخدم حالياً لكن للتوافق)
+        :param hs_profile: كائن HighSchoolProfile
+        :param assessment_scores: قاموس درجات أبعاد الميول (اختياري)
+        :return: قائمة توصيات sorted
+        """
         branch = hs_profile.branch
         overall = hs_profile.overall_percentage if hs_profile.overall_percentage else 0.0
         
@@ -272,6 +363,7 @@ class AnalysisEngine:
             if overall < major["min_percentage"]:
                 continue
 
+            # 1. القدرات الأكاديمية (30%)
             key_subjects = major["key_subjects"]
             subject_scores = []
             for sub in key_subjects:
@@ -280,10 +372,11 @@ class AnalysisEngine:
             
             if subject_scores:
                 avg_subject = sum(subject_scores) / len(subject_scores)
-                subject_score = (avg_subject / 100) * 30
+                academic_score = (avg_subject / 100) * 30
             else:
-                subject_score = 0
+                academic_score = 0
 
+            # 2. درجة الميول من الكلمات المفتاحية (تُحسب دائماً)
             match_keywords = major["keywords"]
             if interests_list and match_keywords:
                 matches = 0
@@ -294,22 +387,50 @@ class AnalysisEngine:
                             break
                 max_possible = len(interests_list)
                 if max_possible > 0:
-                    interest_score = (matches / max_possible) * 30
+                    keyword_interest_score = (matches / max_possible) * 30
                 else:
-                    interest_score = 0
+                    keyword_interest_score = 0
             else:
-                interest_score = 0
+                keyword_interest_score = 0
 
+            # 3. درجة الميول من اختبار الأبعاد (إن وُجد)
+            aptitude_score = 0
+            if assessment_scores and "aptitude_profile" in major:
+                profile = major["aptitude_profile"]
+                weighted_sum = 0
+                total_weight = 0
+                for dim, weight in profile.items():
+                    if dim in assessment_scores:
+                        weighted_sum += assessment_scores[dim] * weight
+                        total_weight += weight
+                if total_weight > 0:
+                    # القيمة الناتجة من 0 إلى 100
+                    aptitude_score = (weighted_sum / total_weight) * 0.30  # وزن 30%
+                else:
+                    aptitude_score = 0
+            else:
+                aptitude_score = 0
+
+            # ندمج درجتي الميول: نأخذ الأفضل بينهما أو نحسب متوسطًا مرجحًا
+            # هنا سنعتمد على درجة الاختبار إذا وُجدت، وإلا نستخدم درجة الكلمات
+            if assessment_scores:
+                interest_score = aptitude_score
+            else:
+                interest_score = keyword_interest_score
+
+            # 4. النسبة العامة (40% كما كانت)
             gpa_score = (overall / 100) * 40
 
-            total_score = subject_score + interest_score + gpa_score
+            total_score = academic_score + interest_score + gpa_score
             total_score = min(100.0, total_score)
 
             reason_parts = []
-            if subject_score > 20:
+            if academic_score > 20:
                 reason_parts.append(f"تميزك في مواد {', '.join(key_subjects)}")
-            if interest_score > 15:
+            if keyword_interest_score > 15:
                 reason_parts.append(f"توافق اهتماماتك مع المجال")
+            if assessment_scores and aptitude_score > 15:
+                reason_parts.append(f"نتائج اختبار الميول تدعم هذا المجال")
             if gpa_score > 30:
                 reason_parts.append(f"نسبتك العامة مرتفعة")
             

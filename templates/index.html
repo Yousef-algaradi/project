@@ -8,37 +8,69 @@
 {% block help_step %}اطلع على الخدمات، ثم سجل دخولك أو أنشئ حساباً.{% endblock %}
 
 {% block content %}
-<div style="text-align: center; padding: 40px 0;">
-    <h1 style="font-size: 3rem; font-weight: 700; letter-spacing: -2px;">🎓 مستشارك الأكاديمي</h1>
-    <p style="font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin: 20px auto;">
-        منصة ذكية تساعدك في اختيار تخصصك الجامعي المناسب بناءً على درجاتك وميولك،
-        مع خارطة طريق مهنية واضحة.
+<!-- Hero Section -->
+<section class="hero" style="text-align: center; padding: 60px 0 40px;">
+    <h1 style="font-size: 3rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 20px; line-height: 1.2;">
+        🎓 مستشارك الأكاديمي الذكي
+    </h1>
+    <p style="font-size: 1.2rem; color: var(--text-secondary); max-width: 650px; margin: 0 auto 30px; line-height: 1.6;">
+        منصة متكاملة تساعدك في اختيار تخصصك الجامعي المناسب بناءً على درجاتك وميولك،
+        مع خارطة طريق مهنية واضحة وتوصيات دقيقة.
     </p>
-    
-    <!-- الاقتباسات المتحركة -->
-    <div id="quotes" style="background: var(--bg-card); padding: 30px; border-radius: var(--radius); margin: 30px 0; min-height: 100px; display: flex; align-items: center; justify-content: center; font-style: italic; font-size: 1.3rem; border: 1px solid var(--border-color); box-shadow: var(--shadow);">
-        "التعليم هو أقوى سلاح يمكنك استخدامه لتغيير العالم."
+    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+        <a href="{{ url_for('auth.login_page') }}" class="btn" style="padding: 14px 32px; font-size: 1.1rem;">
+            <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
+        </a>
+        <a href="{{ url_for('auth.register_page') }}" class="btn btn-outline" style="padding: 14px 32px; font-size: 1.1rem;">
+            <i class="fas fa-user-plus"></i> إنشاء حساب جديد
+        </a>
     </div>
+    <p style="margin-top: 20px; color: var(--text-muted); font-size: 0.95rem;">
+        يمكنك أيضاً التجربة كضيف من خلال أيقونة الحساب في الأعلى
+    </p>
+</section>
 
-    <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-        <a href="{{ url_for('auth.login_page') }}" class="btn"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</a>
-        <a href="{{ url_for('auth.register_page') }}" class="btn btn-outline"><i class="fas fa-user-plus"></i> إنشاء حساب</a>
+<!-- Features Section -->
+<section class="features" style="margin: 40px 0;">
+    <h2 style="text-align: center; font-size: 1.8rem; font-weight: 700; margin-bottom: 30px;">ماذا تقدم المنصة؟</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+        <div class="card" style="text-align: center; padding: 24px;">
+            <i class="fas fa-chart-line" style="font-size: 2.5rem; color: var(--accent); margin-bottom: 15px;"></i>
+            <h3 style="font-size: 1.3rem; margin-bottom: 10px;">تحليل الدرجات</h3>
+            <p style="color: var(--text-secondary);">نقوم بتحليل درجاتك ومهاراتك لتحديد نقاط القوة والاهتمامات.</p>
+        </div>
+        <div class="card" style="text-align: center; padding: 24px;">
+            <i class="fas fa-graduation-cap" style="font-size: 2.5rem; color: var(--accent); margin-bottom: 15px;"></i>
+            <h3 style="font-size: 1.3rem; margin-bottom: 10px;">اقتراح التخصصات</h3>
+            <p style="color: var(--text-secondary);">نرشح لك أفضل التخصصات الجامعية المناسبة لملفك الأكاديمي.</p>
+        </div>
+        <div class="card" style="text-align: center; padding: 24px;">
+            <i class="fas fa-map-signs" style="font-size: 2.5rem; color: var(--accent); margin-bottom: 15px;"></i>
+            <h3 style="font-size: 1.3rem; margin-bottom: 10px;">خارطة طريق مهنية</h3>
+            <p style="color: var(--text-secondary);">نوفر لك مساراً واضحاً للمستقبل الوظيفي بعد التخرج.</p>
+        </div>
     </div>
-    <p style="margin-top: 20px; color: var(--text-secondary); font-size: 0.9rem;">✨ جرب كمستخدم تجريبي عبر أيقونة الحساب في الأعلى</p>
-</div>
+</section>
 
-<script>
-    // حركة الاقتباسات (Motion)
-    const quotes = [
-        '"التعليم هو أقوى سلاح يمكنك استخدامه لتغيير العالم." - نيلسون مانديلا',
-        '"المستقبل ملك لأولئك الذين يعدّون له اليوم." - مالكوم إكس',
-        '"اختر تخصصاً تحبه، ولن تعمل يوماً واحداً في حياتك." - كونفوشيوس',
-        '"النجاح ليس نهائياً، والفشل ليس قاتلاً، بل الشجاعة للاستمرار هي ما يهم." - ونستون تشرشل'
-    ];
-    let idx = 0;
-    setInterval(() => {
-        idx = (idx + 1) % quotes.length;
-        document.getElementById('quotes').innerHTML = quotes[idx];
-    }, 4000);
-</script>
+<!-- How it Works Section -->
+<section class="how-it-works" style="margin: 40px 0;">
+    <h2 style="text-align: center; font-size: 1.8rem; font-weight: 700; margin-bottom: 30px;">كيف تبدأ؟</h2>
+    <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
+        <div style="text-align: center; max-width: 250px;">
+            <div style="font-size: 2rem; background: var(--accent-light); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: var(--accent); font-weight: bold;">1</div>
+            <h3 style="font-size: 1.2rem;">أنشئ حسابك</h3>
+            <p style="color: var(--text-secondary);">سجل دخولك أو أنشئ حساباً جديداً للبدء.</p>
+        </div>
+        <div style="text-align: center; max-width: 250px;">
+            <div style="font-size: 2rem; background: var(--accent-light); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: var(--accent); font-weight: bold;">2</div>
+            <h3 style="font-size: 1.2rem;">أدخل بياناتك الأكاديمية</h3>
+            <p style="color: var(--text-secondary);">قم بإدخال درجاتك واهتماماتك في لوحة التحكم.</p>
+        </div>
+        <div style="text-align: center; max-width: 250px;">
+            <div style="font-size: 2rem; background: var(--accent-light); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; color: var(--accent); font-weight: bold;">3</div>
+            <h3 style="font-size: 1.2rem;">احصل على توصياتك</h3>
+            <p style="color: var(--text-secondary);">استلم قائمة بالتخصصات المناسبة مع مسارات مهنية مفصلة.</p>
+        </div>
+    </div>
+</section>
 {% endblock %}

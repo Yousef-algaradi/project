@@ -1,16 +1,51 @@
 # routes/student.py
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from utils.decorators import login_required
-from models.user import User
+from models.user import User, AssessmentResult
 from models.high_school import HighSchoolProfile
 from models.recommendation import Recommendation
 from services.analysis_engine import AnalysisEngine
+from services.assessment_engine import AssessmentEngine
 
 from database import db
 import json
 
 student_bp = Blueprint('student', __name__)
 
+# ========== عرض صفحة اختبار الميول ==========
+@student_bp.route('/assessment')
+@login_required
+def assessment():
+    # جلب أسئلة الاختبار من AssessmentEngine
+    questions = AssessmentEngine.QUESTIONS
+    return render_template('assessment.html', questions=questions)
+
+# ========== استقبال نتائج اختبار الميول ==========
+@student_bp.route('/assessment/submit', methods=['POST'])
+@login_required
+def submit_assessment():
+    user_id = session['user_id']
+    data = request.get_json()
+    if not data:
+        return jsonify({'error': 'لا توجد بيانات'}), 400
+
+    answers = data.get('answers', {})  # {question_id: option_id}
+    # حساب درجات الأبعاد
+    scores = AssessmentEngine.calculate_dimension_scores(answers)
+
+    # حفظ أو تحديث نتيجة المستخدم في قاعدة البيانات
+    result = AssessmentResult.query.filter_by(user_id=user_id).first()
+    if not result:
+        result = AssessmentResult(user_id=user_id)
+        db.session.add(result)
+
+    result.aptitude_answers = json.dumps(answers, ensure_ascii=False)
+    result.aptitude_scores = json.dumps(scores, ensure_ascii=False)
+    db.session.commit()
+
+    return jsonify({'success': True, 'scores': scores})
+
+# ========== الملف الأكاديمي ==========
 @student_bp.route('/profile', methods=['GET'])
 @login_required
 def profile():
@@ -28,7 +63,20 @@ def profile():
         if user.high_school_profile.interests:
             selected_interests = [i.strip() for i in user.high_school_profile.interests.split('،')]
     
-    return render_template('hs_profile.html', user=user, subject_grades=subject_grades, selected_interests=selected_interests)
+    # جلب نتيجة اختبار الميول إن وُجدت
+    assessment_scores = {}
+    assessment_completed = False
+    assessment_result = AssessmentResult.query.filter_by(user_id=user_id).first()
+    if assessment_result and assessment_result.aptitude_scores:
+        assessment_scores = assessment_result.get_aptitude_scores()
+        assessment_completed = True
+
+    return render_template('hs_profile.html', 
+                           user=user, 
+                           subject_grades=subject_grades, 
+                           selected_interests=selected_interests,
+                           assessment_scores=assessment_scores,
+                           assessment_completed=assessment_completed)
 
 @student_bp.route('/profile', methods=['POST'])
 @login_required
@@ -39,7 +87,6 @@ def update_profile():
     branch = request.form.get('branch', 'علمي')
     overall = request.form.get('overall_percentage', type=float)
     
-    # جلب درجات المواد الخمسة
     math_grade = request.form.get('subject_math', type=float)
     physics_grade = request.form.get('subject_physics', type=float)
     chemistry_grade = request.form.get('subject_chemistry', type=float)
@@ -89,6 +136,7 @@ def update_profile():
     flash('تم حفظ بيانات الثانوية بنجاح', 'success')
     return redirect(url_for('student.profile'))
 
+# ========== تشغيل المحلل الأكاديمي ==========
 @student_bp.route('/analyze')
 @login_required
 def analyze():
@@ -99,47 +147,33 @@ def analyze():
         flash('يرجى إدخال بيانات الثانوية أولاً', 'warning')
         return redirect(url_for('student.profile'))
     
-    # 1. تحليل بيانات الثانوية
-    recommendations = AnalysisEngine.analyze_student(user_id, user.high_school_profile)
+    # 1. جلب نتائج اختبار الميول من قاعدة البيانات إن وُجدت
+    assessment_result = AssessmentResult.query.filter_by(user_id=user_id).first()
+    assessment_scores = {}
+    if assessment_result:
+        assessment_scores = assessment_result.get_aptitude_scores()
     
-    # 2. دمج نتائج الاختبار (نفس الكود)
-    assessment_scores = session.get('assessment_scores', {})
-    if assessment_scores and recommendations:
-        mapping = {
-            'data science': 'data_science',
-            'ai': 'ai',
-            'cyber security': 'cyber',
-            'it': 'it',
-            'software engineering': 'software'
-        }
-        for rec in recommendations:
-            major_key = rec['major_title'].split('(')[-1].strip().replace(')', '').lower()
-            mapped_key = mapping.get(major_key, major_key)
-            if mapped_key in assessment_scores:
-                assessment_score = assessment_scores[mapped_key]
-                rec['match_percentage'] = round((rec['match_percentage'] * 0.7) + (assessment_score * 0.3), 2)
+    # 2. تحليل بيانات الثانوية مع نتائج الاختبار (تمرير assessment_scores)
+    recommendations = AnalysisEngine.analyze_student(user_id, user.high_school_profile, assessment_scores)
     
     if not recommendations:
         flash('لا توجد توصيات مناسبة بناءً على بياناتك الحالية', 'info')
         return redirect(url_for('dashboard.home'))
     
-    # ✅ حذف التوصيات القديمة
+    # حذف التوصيات القديمة
     Recommendation.query.filter_by(user_id=user_id).delete()
     
-    # ✅ حفظ التوصيات الجديدة مع المسارات المهنية
+    # حفظ التوصيات الجديدة مع المسارات المهنية
     for rec in recommendations:
         new_rec = Recommendation(
             user_id=user_id,
             major_title=rec['major_title'],
             match_percentage=rec['match_percentage'],
             reason=rec['reason'],
-            career_paths=json.dumps(rec['career_paths'], ensure_ascii=False)  # ← التغيير الرئيسي
+            career_paths=json.dumps(rec['career_paths'], ensure_ascii=False)
         )
         db.session.add(new_rec)
     db.session.commit()
-    
-    # ❌ حذف السطر التالي (لم يعد ضرورياً)
-    # session['career_paths'] = {rec['major_title']: rec['career_paths'] for rec in recommendations}
     
     flash('تم تحليل بياناتك وإنشاء التوصيات بنجاح!', 'success')
     return redirect(url_for('dashboard.home'))
