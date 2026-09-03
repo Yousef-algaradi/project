@@ -1,5 +1,6 @@
 # models/user.py
 from database import db
+import json
 from datetime import datetime
 
 class User(db.Model):
@@ -16,3 +17,24 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.email}>'
+
+    
+
+class AssessmentResult(db.Model):
+    __tablename__ = 'assessment_results'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
+    aptitude_answers = db.Column(db.Text, default='{}')   # JSON: {question_id: option_id}
+    aptitude_scores = db.Column(db.Text, default='{}')    # JSON: {dimension: score}
+    completed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='assessment_result', uselist=False)
+
+    def get_aptitude_scores(self):
+        if self.aptitude_scores:
+            return json.loads(self.aptitude_scores)
+        return {}
+
+    def __repr__(self):
+        return f'<AssessmentResult User {self.user_id}>'

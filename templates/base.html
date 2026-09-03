@@ -8,89 +8,225 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        /* تنسيقات الشريط العلوي */
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0 20px;
+            min-height: 80px;
+            gap: 20px;
+        }
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--text, #1e293b);
+        }
+        .logo-icon {
+            font-size: 2.2rem;
+        }
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text, #1e293b);
+        }
+        /* زر الرجوع */
+        .btn-outline {
+            font-size: 1.2rem;
+            padding: 12px 28px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            background: transparent;
+            color: var(--text, #1e293b);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
+        /* الأزرار الأيقونية */
+        .icon-btn {
+            font-size: 1.3rem !important;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: none;
+            border: 1px solid transparent;
+            cursor: pointer;
+            color: var(--text, #1e293b);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .icon-btn i {
+            font-size: 1.6rem;
+        }
+        .icon-btn:hover {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
+        /* عند الجوال */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: inline-flex;
+                align-items: center;
+            }
+            .navbar-actions {
+                position: absolute;
+                top: 80px;
+                left: 0;
+                right: 0;
+                background: var(--bg, #fff);
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 20px;
+                display: none;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                z-index: 1000;
+                gap: 15px;
+            }
+            .navbar-actions.active {
+                display: flex;
+            }
+            .btn-outline {
+                font-size: 1.1rem;
+                padding: 10px 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="logo">🎓 المستشار الأكاديمي</div>
-        <div class="actions">
-            <button onclick="toggleHelp()" title="مساعدة" class="icon-btn">
-                <i class="fas fa-question-circle"></i>
-                <span class="icon-label">مساعدة</span>
-            </button>
-            <button onclick="toggleLanguage()" title="تغيير اللغة" class="icon-btn">
-                <i class="fas fa-globe"></i>
-                <span class="icon-label">اللغة</span>
-            </button>
-            <button onclick="toggleTheme()" title="الوضع المظلم/الفاتح" class="icon-btn">
-                <i class="fas fa-moon"></i>
-                <span class="icon-label">الثيم</span>
-            </button>
-            <div class="account-menu">
-                <button onclick="toggleAccountMenu()" class="icon-btn">
-                    <i class="fas fa-user-circle"></i>
-                    <span class="icon-label">الحساب</span>
+    <!-- شريط التنقل الرئيسي -->
+    <header class="navbar" role="banner">
+        <div class="navbar-container">
+            <!-- الشعار وزر القائمة للجوال -->
+            <div class="navbar-brand">
+                <a href="{{ url_for('main.index') }}" class="logo" aria-label="المستشار الأكاديمي - الصفحة الرئيسية">
+                    <i class="fas fa-graduation-cap logo-icon"></i>
+                    <span>المستشار الأكاديمي</span>
+                </a>
+                <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="فتح القائمة" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
                 </button>
-                <div id="accountDropdown" class="dropdown-content">
-                    {% if session.user_id %}
-                        <a href="{{ url_for('dashboard.home') }}"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a>
-                        <a href="{{ url_for('student.profile') }}"><i class="fas fa-edit"></i> بياناتي</a>
-                        <div class="divider"></div>
-                        <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</a>
-                    {% else %}
-                        <a href="{{ url_for('auth.login_page') }}"><i class="fas fa-sign-in-alt"></i> تسجيل الدخول</a>
-                        <a href="#" onclick="alert('سيتم تسجيلك كمستخدم تجريبي')"><i class="fas fa-user-astronaut"></i> مستخدم تجريبي</a>
-                        <div class="divider"></div>
-                        <a href="{{ url_for('auth.register_page') }}"><i class="fas fa-user-plus"></i> إنشاء حساب جديد</a>
-                    {% endif %}
-                </div>
             </div>
-        </div>
-    </nav>
 
-    <div id="helpPanel" class="help-panel">
-        <button class="close-btn" onclick="toggleHelp()">&times;</button>
-        <h2>📘 مساعدة: {% block help_title %}هذه الصفحة{% endblock %}</h2>
+            <!-- القائمة الرئيسية (أزرار وأيقونات) - في اليسار -->
+            <nav class="navbar-actions" id="navbarActions" aria-label="قائمة التنقل">
+                <!-- زر الرجوع (أصبح في اليسار وأكبر) -->
+                <a href="javascript:history.back()" class="btn-outline" style="margin-left: 10px;">
+                    <i class="fas fa-arrow-right"></i> رجوع
+                </a>
+                <!-- أزرار المساعدة واللغة والثيم -->
+                <button onclick="toggleHelp()" title="مساعدة" class="icon-btn" aria-label="مساعدة">
+                    <i class="fas fa-question-circle"></i>
+                    <span class="icon-label">مساعدة</span>
+                </button>
+                <button onclick="toggleLanguage()" title="تغيير اللغة" class="icon-btn" aria-label="تغيير اللغة">
+                    <i class="fas fa-globe"></i>
+                    <span class="icon-label">اللغة</span>
+                </button>
+                <button onclick="toggleTheme()" title="الوضع المظلم/الفاتح" class="icon-btn" aria-label="تبديل الثيم">
+                    <i class="fas fa-moon"></i>
+                    <span class="icon-label">الثيم</span>
+                </button>
+                <!-- منطقة الحساب فقط عند تسجيل الدخول -->
+                {% if session.user_id %}
+                    <div class="account-menu">
+                        <button onclick="toggleAccountMenu()" class="icon-btn" aria-label="الحساب" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i>
+                            <span class="icon-label">الحساب</span>
+                        </button>
+                        <div id="accountDropdown" class="dropdown-content">
+                            <a href="{{ url_for('dashboard.home') }}"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a>
+                            <a href="{{ url_for('student.profile') }}"><i class="fas fa-edit"></i> بياناتي</a>
+                            <div class="divider"></div>
+                            <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- لوحة المساعدة -->
+    <div id="helpPanel" class="help-panel" role="dialog" aria-labelledby="helpTitle">
+        <button class="close-btn" onclick="toggleHelp()" aria-label="إغلاق المساعدة">&times;</button>
+        <h2 id="helpTitle">📘 مساعدة: {% block help_title %}هذه الصفحة{% endblock %}</h2>
         <p>{% block help_content %}هذا شرح عام للمساعدة.{% endblock %}</p>
         <hr>
         <p><strong>💡 خطوة مقترحة:</strong> {% block help_step %}استكشف الخيارات المتاحة.{% endblock %}</p>
     </div>
 
-    <div style="display: flex; justify-content: flex-end; margin: 10px 0;">
-        <a href="javascript:history.back()" class="btn btn-outline" style="font-size:0.9rem; padding: 6px 14px;">
-            <i class="fas fa-arrow-right"></i> رجوع
-        </a>
-    </div>
-
-    <div class="container">
-        <!-- رسائل الفلاش - تم التصحيح -->
+    <!-- المحتوى الرئيسي -->
+    <main class="container">
+        <!-- رسائل الفلاش -->
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, msg in messages %}
-                {% if category == 'danger' %}
-                    <div class="card border-danger">
-                {% elif category == 'success' %}
-                    <div class="card border-success">
-                {% else %}
-                    <div class="card border-warning">
-                {% endif %}
+                <div class="card border-{{ category if category in ['danger', 'success', 'warning'] else 'info' }}">
                     {{ msg }}
                 </div>
             {% endfor %}
         {% endwith %}
 
         {% block content %}{% endblock %}
-    </div>
+    </main>
 
-    <div id="toast-container"></div>
+    <!-- حاوية التنبيهات المنبثقة -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // عرض رسائل الفلاش كتوست
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% for category, msg in messages %}
                     showToast('{{ msg }}', '{{ category }}');
                 {% endfor %}
             {% endwith %}
+
+            // تفعيل زر القائمة للجوال
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navbarActions = document.getElementById('navbarActions');
+            if (mobileMenuToggle && navbarActions) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    const expanded = this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true';
+                    this.setAttribute('aria-expanded', expanded);
+                    navbarActions.classList.toggle('active');
+                });
+                // إغلاق القائمة عند النقر خارجها
+                document.addEventListener('click', function(event) {
+                    if (!navbarActions.contains(event.target) && event.target !== mobileMenuToggle) {
+                        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                        navbarActions.classList.remove('active');
+                    }
+                });
+            }
         });
 
         function showToast(message, type = 'info') {
@@ -98,9 +234,10 @@
             if (!container) return;
             const toast = document.createElement('div');
             toast.className = `toast toast-${type}`;
+            toast.setAttribute('role', 'alert');
             toast.innerHTML = `
                 <span>${message}</span>
-                <button onclick="this.parentElement.remove()">&times;</button>
+                <button onclick="this.parentElement.remove()" aria-label="إغلاق">&times;</button>
             `;
             container.appendChild(toast);
             setTimeout(() => {

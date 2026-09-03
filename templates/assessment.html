@@ -1,0 +1,268 @@
+<!-- templates/assessment.html -->
+{% extends "base.html" %}
+
+{% block title %}اختبار الميول المهنية - المستشار الأكاديمي{% endblock %}
+
+{% block help_title %}اختبار الميول المهنية{% endblock %}
+{% block help_content %}أجب عن الأسئلة التالية لمساعدتنا في فهم ميولك وقدراتك بشكل أدق.{% endblock %}
+{% block help_step %}اختر إجابة لكل سؤال أو اضغط "تخطي" للانتقال للسؤال التالي.{% endblock %}
+
+{% block content %}
+<div class="assessment-container">
+    <header class="assessment-header">
+        <h1>🧭 اختبار الميول المهنية</h1>
+        <p>أجب عن 20 سؤالًا لنساعدك في تحديد التخصص الأنسب لك.</p>
+    </header>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+    </div>
+    <div class="progress-text" id="progressText">السؤال 1 من 20</div>
+
+    <div class="question-card" id="questionCard">
+        <h2 class="question-text" id="questionText">جاري تحميل الأسئلة...</h2>
+        <div class="options-list" id="optionsList"></div>
+    </div>
+
+    <div class="assessment-actions">
+        <button class="btn btn-outline" id="skipBtn" onclick="skipQuestion()">تخطي السؤال ⏭️</button>
+        <button class="btn btn-outline" id="prevBtn" onclick="prevQuestion()" style="display:none;">السابق</button>
+    </div>
+
+    <div id="submitSection" style="display:none; text-align:center; margin-top: 30px;">
+        <button class="btn btn-primary btn-lg" onclick="submitAssessment()">إرسال النتائج 📊</button>
+    </div>
+</div>
+
+<!-- تخزين بيانات الأسئلة بتنسيق JSON آمن -->
+<script type="application/json" id="questions-data">{{ questions | tojson }}</script>
+
+<style>
+    .assessment-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 0 16px;
+    }
+    .assessment-header {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+    .assessment-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .assessment-header p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+    .progress-container {
+        background: var(--bg-elevated);
+        border-radius: 20px;
+        height: 10px;
+        margin-bottom: 8px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+    .progress-bar {
+        height: 100%;
+        background: var(--accent);
+        border-radius: 20px;
+        transition: width 0.3s ease;
+    }
+    .progress-text {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+    .question-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 28px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 20px;
+    }
+    .question-text {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+    .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .option-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        background: var(--bg-elevated);
+        cursor: pointer;
+        transition: background var(--transition-fast), border-color var(--transition-fast);
+        font-size: 1rem;
+    }
+    .option-item:hover {
+        background: var(--surface-hover);
+        border-color: var(--text-muted);
+    }
+    .option-item.selected {
+        border-color: var(--accent);
+        background: var(--accent-light);
+    }
+    .option-item input[type="radio"] {
+        width: auto;
+        margin: 0;
+    }
+    .assessment-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .btn-lg {
+        width: 100%;
+        padding: 14px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    @media (max-width: 480px) {
+        .question-text {
+            font-size: 1.1rem;
+        }
+        .option-item {
+            padding: 12px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+
+<script>
+(function() {
+    // قراءة الأسئلة من عنصر JSON الآمن
+    const questionsDataElement = document.getElementById('questions-data');
+    const aptitudeQuestionsData = JSON.parse(questionsDataElement.textContent);
+
+    let currentIndex = 0;
+    const answers = {};
+
+    function renderQuestion() {
+        if (currentIndex >= aptitudeQuestionsData.length) {
+            showSubmitSection();
+            return;
+        }
+
+        const q = aptitudeQuestionsData[currentIndex];
+        document.getElementById('questionText').textContent = q.text;
+        const optionsContainer = document.getElementById('optionsList');
+        optionsContainer.innerHTML = '';
+
+        q.options.forEach(option => {
+            const label = document.createElement('label');
+            label.className = 'option-item' + (answers[q.id] === option.id ? ' selected' : '');
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = `question_${q.id}`;
+            input.value = option.id;
+            if (answers[q.id] === option.id) {
+                input.checked = true;
+            }
+            label.appendChild(input);
+            const span = document.createElement('span');
+            span.textContent = option.text;
+            label.appendChild(span);
+            label.addEventListener('click', function() {
+                selectOption(q.id, option.id);
+            });
+            optionsContainer.appendChild(label);
+        });
+
+        const progress = (currentIndex / aptitudeQuestionsData.length) * 100;
+        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById('progressText').textContent = `السؤال ${currentIndex + 1} من ${aptitudeQuestionsData.length}`;
+        document.getElementById('prevBtn').style.display = currentIndex > 0 ? 'inline-flex' : 'none';
+        document.getElementById('submitSection').style.display = 'none';
+    }
+
+    function selectOption(questionId, optionId) {
+        answers[questionId] = optionId;
+        document.querySelectorAll('.option-item').forEach(item => item.classList.remove('selected'));
+        const selectedInput = document.querySelector(`input[name="question_${questionId}"][value="${optionId}"]`);
+        if (selectedInput) {
+            selectedInput.closest('.option-item').classList.add('selected');
+        }
+        setTimeout(() => nextQuestion(), 200);
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        renderQuestion();
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            renderQuestion();
+        }
+    }
+
+    function skipQuestion() {
+        nextQuestion();
+    }
+
+    function showSubmitSection() {
+        document.getElementById('questionCard').style.display = 'none';
+        document.getElementById('skipBtn').style.display = 'none';
+        document.getElementById('prevBtn').style.display = 'none';
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('progressText').textContent = 'اكتمل الاختبار!';
+        document.getElementById('submitSection').style.display = 'block';
+    }
+
+    async function submitAssessment() {
+        const submitBtn = document.querySelector('#submitSection .btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+
+        try {
+            const response = await fetch('{{ url_for("student.submit_assessment") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answers: answers })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast('✅ تم حفظ نتائج الاختبار بنجاح!', 'success');
+                setTimeout(() => {
+                    window.location.href = '{{ url_for("student.analyze") }}';
+                }, 1500);
+            } else {
+                showToast('❌ حدث خطأ أثناء الحفظ.', 'danger');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'إرسال النتائج 📊';
+            }
+        } catch (error) {
+            showToast('❌ خطأ في الاتصال بالخادم.', 'danger');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'إرسال النتائج 📊';
+        }
+    }
+
+    window.skipQuestion = skipQuestion;
+    window.prevQuestion = prevQuestion;
+    window.submitAssessment = submitAssessment;
+
+    renderQuestion();
+})();
+</script>
+{% endblock %}
