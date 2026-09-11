@@ -4,8 +4,8 @@
 {% block title %}بيانات الثانوية - المستشار الأكاديمي{% endblock %}
 
 {% block help_title %}بيانات خريج الثانوية{% endblock %}
-{% block help_content %}أدخل درجاتك في جميع المواد (رياضيات، فيزياء، كيمياء، أحياء، إنجليزية) واختر اهتماماتك.{% endblock %}
-{% block help_step %}املأ الجدول، اختر اهتماماتك، ثم اضغط "حفظ البيانات"، وبعدها "تشغيل المحلل الأكاديمي".{% endblock %}
+{% block help_content %}اختر قسمك (علمي/أدبي)، ثم أدخل درجاتك واهتماماتك للحصول على توصيات دقيقة.{% endblock %}
+{% block help_step %}اختر القسم، املأ البيانات، ثم اضغط "حفظ وتحليل".{% endblock %}
 
 {% block content %}
 <div class="profile-container">
@@ -15,217 +15,238 @@
     </header>
 
     <form method="POST" action="{{ url_for('student.profile') }}" id="hsForm" class="profile-form" novalidate>
-        <!-- Hidden branch field -->
-        <input type="hidden" name="branch" value="علمي">
+        <input type="hidden" name="branch" id="branchInput" value="{{ user.high_school_profile.branch if user.high_school_profile else '' }}">
 
-        <!-- Section 1: النسبة المئوية -->
-        <section class="form-section" aria-labelledby="percentage-heading">
-            <h2 id="percentage-heading" class="section-title">النسبة المئوية</h2>
-            <div class="form-group">
-                <label for="overall_percentage">النسبة المئوية الإجمالية (٪)</label>
-                <input type="text" id="overall_percentage" name="overall_percentage" 
-                       placeholder="مثال: 88.5 أو ٨٨.٥" 
-                       value="{{ user.high_school_profile.overall_percentage if user.high_school_profile else '' }}"
-                       inputmode="decimal"
-                       aria-describedby="percentage-help"
-                       required>
-                <small id="percentage-help" class="helper-text">أدخل النسبة من 0 إلى 100</small>
-                <div class="error-message" id="percentage-error"></div>
+        <!-- قسم اختيار القسم -->
+        <section class="form-section branch-selector-section" id="branchSelectorSection" aria-labelledby="branch-heading">
+            <h2 id="branch-heading" class="section-title">🎓 اختر قسمك الدراسي</h2>
+            <div class="branch-cards">
+                <button type="button" class="branch-card" data-branch="علمي" onclick="selectBranch('علمي')">
+                    <div class="branch-icon">🔬</div>
+                    <div class="branch-name">علمي</div>
+                    <div class="branch-desc">رياضيات، فيزياء، كيمياء، أحياء</div>
+                </button>
+                <button type="button" class="branch-card" data-branch="أدبي" onclick="selectBranch('أدبي')">
+                    <div class="branch-icon">📖</div>
+                    <div class="branch-name">أدبي</div>
+                    <div class="branch-desc">عربي، تاريخ، جغرافيا، إسلامية</div>
+                </button>
             </div>
         </section>
 
-        <!-- Section 2: درجات المواد الأساسية -->
-        <section class="form-section" aria-labelledby="grades-heading">
-            <h2 id="grades-heading" class="section-title">درجات المواد الأساسية</h2>
-            <div class="table-responsive">
-                <table class="subjects-table" aria-label="جدول درجات المواد">
-                    <thead>
-                        <tr>
-                            <th scope="col">المادة</th>
-                            <th scope="col" class="grade-col">الدرجة (من 100)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="subjectsTable">
-                        <tr>
-                            <td><label for="subject_math">📐 رياضيات</label></td>
-                            <td>
-                                <input type="number" id="subject_math" name="subject_math" min="0" max="100" 
-                                       value="{{ subject_grades.math if subject_grades else '' }}"
-                                       placeholder="0-100"
-                                       class="grade-input"
-                                       required>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label for="subject_physics">⚡ فيزياء</label></td>
-                            <td>
-                                <input type="number" id="subject_physics" name="subject_physics" min="0" max="100" 
-                                       value="{{ subject_grades.physics if subject_grades else '' }}"
-                                       placeholder="0-100"
-                                       class="grade-input"
-                                       required>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label for="subject_chemistry">🧪 كيمياء</label></td>
-                            <td>
-                                <input type="number" id="subject_chemistry" name="subject_chemistry" min="0" max="100" 
-                                       value="{{ subject_grades.chemistry if subject_grades else '' }}"
-                                       placeholder="0-100"
-                                       class="grade-input"
-                                       required>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label for="subject_biology">🧬 أحياء</label></td>
-                            <td>
-                                <input type="number" id="subject_biology" name="subject_biology" min="0" max="100" 
-                                       value="{{ subject_grades.biology if subject_grades else '' }}"
-                                       placeholder="0-100"
-                                       class="grade-input"
-                                       required>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><label for="subject_english">🇬🇧 لغة إنجليزية</label></td>
-                            <td>
-                                <input type="number" id="subject_english" name="subject_english" min="0" max="100" 
-                                       value="{{ subject_grades.english if subject_grades else '' }}"
-                                       placeholder="0-100"
-                                       class="grade-input"
-                                       required>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- حاوية البيانات -->
+        <div id="dataContainer" style="display: none;">
+            <div class="selected-branch-bar">
+                <span>القسم المختار: <strong id="selectedBranchText"></strong></span>
+                <button type="button" class="btn-change-branch" onclick="changeBranch()">
+                    <i class="fas fa-exchange-alt"></i> تغيير القسم
+                </button>
             </div>
-            <button type="button" class="btn btn-outline btn-sm" onclick="addSubjectRow()" aria-label="إضافة مادة جديدة">
-                ➕ إضافة مادة اختيارية
-            </button>
-            <div class="error-message" id="grades-error"></div>
-        </section>
 
-        <!-- Section 3: الاهتمامات -->
-        <section class="form-section" aria-labelledby="interests-heading">
-            <h2 id="interests-heading" class="section-title">الاهتمامات والميول</h2>
-            <fieldset class="interests-fieldset">
-                <legend class="sr-only">اختر اهتماماتك</legend>
-                <div class="interests-grid">
-                    {% set interests_list = ['برمجة', 'حاسوب', 'شبكات', 'أمن سيبراني', 'ذكاء اصطناعي', 'تطوير ويب', 'تحليل بيانات', 'طب', 'هندسة', 'إدارة أعمال'] %}
-                    {% for interest in interests_list %}
-                    <label class="interest-option">
-                        <input type="checkbox" name="interests" value="{{ interest }}" 
-                               {% if interest in selected_interests %}checked{% endif %}>
-                        <span>{% if interest == 'برمجة' %}💻{% elif interest == 'حاسوب' %}🖥️{% elif interest == 'شبكات' %}🌐{% elif interest == 'أمن سيبراني' %}🔒{% elif interest == 'ذكاء اصطناعي' %}🤖{% elif interest == 'تطوير ويب' %}🌍{% elif interest == 'تحليل بيانات' %}📊{% elif interest == 'طب' %}🏥{% elif interest == 'هندسة' %}🏗️{% else %}💼{% endif %} {{ interest }}</span>
-                    </label>
-                    {% endfor %}
+            <section class="form-section" aria-labelledby="percentage-heading">
+                <h2 id="percentage-heading" class="section-title">📈 النسبة المئوية</h2>
+                <div class="form-group">
+                    <label for="overall_percentage">النسبة المئوية الإجمالية (٪)</label>
+                    <input type="text" id="overall_percentage" name="overall_percentage" 
+                           placeholder="مثال: 88.5 أو ٨٨.٥" 
+                           value="{{ user.high_school_profile.overall_percentage if user.high_school_profile else '' }}"
+                           inputmode="decimal"
+                           aria-describedby="percentage-help"
+                           required>
+                    <small id="percentage-help" class="helper-text">أدخل النسبة من 0 إلى 100</small>
+                    <div class="error-message" id="percentage-error"></div>
                 </div>
-                <small class="helper-text">✓ يمكنك اختيار أكثر من اهتمام</small>
-            </fieldset>
-            <div class="error-message" id="interests-error"></div>
-        </section>
+            </section>
 
-        <!-- أزرار الإجراءات -->
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">
-                <span class="btn-text">💾 حفظ البيانات</span>
-                <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin"></i></span>
-            </button>
+            <section class="form-section" aria-labelledby="grades-heading">
+                <h2 id="grades-heading" class="section-title">📚 درجات المواد الأساسية</h2>
+                <div class="table-responsive">
+                    <table class="subjects-table" aria-label="جدول درجات المواد">
+                        <thead>
+                            <tr>
+                                <th scope="col">المادة</th>
+                                <th scope="col" class="grade-col">الدرجة (من 100)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsTable"></tbody>
+                    </table>
+                </div>
+                <div class="error-message" id="grades-error"></div>
+            </section>
+
+            <section class="form-section" aria-labelledby="interests-heading">
+                <h2 id="interests-heading" class="section-title">💡 الاهتمامات والميول</h2>
+                <fieldset class="interests-fieldset">
+                    <legend class="sr-only">اختر اهتماماتك</legend>
+                    <div class="interests-grid" id="interestsGrid"></div>
+                    <small class="helper-text">✓ يمكنك اختيار أكثر من اهتمام</small>
+                </fieldset>
+                <div class="error-message" id="interests-error"></div>
+            </section>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">
+                    <span class="btn-text">💾 حفظ وتحليل</span>
+                    <span class="btn-loader" style="display:none;"><i class="fas fa-spinner fa-spin"></i> جاري التحليل...</span>
+                </button>
+            </div>
         </div>
     </form>
 
-    <!-- قسم اختبار الميول ونتيجته -->
-    <section class="assessment-section" style="margin-top: 30px;">
-        {% if assessment_completed %}
-        <div class="assessment-result-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
-            <h3 style="margin-bottom: 15px;">📋 نتيجة اختبار الميول:</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;">
-                {% for dim, score in assessment_scores.items() %}
-                <div style="background: var(--bg-elevated); padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-                    <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 4px;">{{ dim }}</div>
-                    <div style="font-size: 1.3rem; font-weight: 700; color: var(--accent);">{{ score }}%</div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% else %}
-        <div style="text-align: center; margin: 20px 0;">
-            <p style="color: var(--text-secondary); margin-bottom: 15px;">لم تقم بإجراء اختبار الميول بعد.</p>
-            <a href="{{ url_for('student.assessment') }}" class="btn btn-primary" style="padding: 12px 24px;">
-                <i class="fas fa-brain"></i> ابدأ اختبار الميول
-            </a>
-        </div>
-        {% endif %}
-    </section>
 
-    <hr class="divider">
-
-    <div class="secondary-actions">
-        <a href="{{ url_for('dashboard.home') }}" class="btn btn-outline">
-            <i class="fas fa-arrow-right"></i> العودة للوحة التحكم
-        </a>
-        <a href="{{ url_for('student.assessment') }}" class="btn btn-outline">
-            <i class="fas fa-brain"></i> اختبار الميول
-        </a>
-        <a href="{{ url_for('student.analyze') }}" class="btn btn-secondary">
-            <i class="fas fa-robot"></i> تشغيل المحلل الأكاديمي
-        </a>
+<!-- ========================================== -->
+<!-- Modal: هل تريد اختبار الميول؟              -->
+<!-- ========================================== -->
+<div id="assessmentChoiceModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <div class="modal-icon">🧭</div>
+        <h2>هل تريد إجراء اختبار الميول؟</h2>
+        <p>الاختبار <strong>اختياري</strong>، لكنه يساعدنا في تقديم توصيات أكثر دقة لك.</p>
+        
+        <div class="modal-actions">
+            <button type="button" class="btn btn-primary modal-btn" onclick="proceedWithAssessment()">
+                <i class="fas fa-brain"></i> نعم، ابدأ الاختبار
+            </button>
+            <button type="button" class="btn btn-outline modal-btn" onclick="proceedWithoutAssessment()">
+                <i class="fas fa-forward"></i> لا، احفظ وحلّل مباشرة
+            </button>
+        </div>
     </div>
 </div>
 
 <style>
-    /* تنسيقات صفحة بيانات الثانوية */
     .profile-container {
-        max-width: 800px;
+        max-width: 1400px;
         margin: 0 auto;
-        padding: 0 16px;
+        padding: 0 24px;
     }
     .profile-header {
-        margin-bottom: 24px;
+        margin-bottom: 28px;
     }
     .profile-header h1 {
-        font-size: 2rem;
+        font-size: 2.4rem;
         font-weight: 700;
-        margin-bottom: 4px;
+        margin-bottom: 8px;
     }
     .profile-header p {
         color: var(--text-secondary);
-        font-size: 1rem;
+        font-size: 1.15rem;
     }
     .form-section {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: var(--radius);
-        padding: 20px;
-        margin-bottom: 20px;
+        padding: 28px;
+        margin-bottom: 24px;
         box-shadow: var(--shadow-sm);
     }
     .section-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        margin-bottom: 16px;
-        padding-bottom: 8px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
         border-bottom: 1px solid var(--border-color);
+    }
+    .branch-selector-section {
+        text-align: center;
+    }
+    .branch-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    .branch-card {
+        background: var(--bg-elevated);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 32px 24px;
+        cursor: pointer;
+        transition: all var(--transition);
+        text-align: center;
+        font-family: inherit;
+    }
+    .branch-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        background: var(--accent-light);
+    }
+    .branch-card.selected {
+        border-color: var(--accent);
+        background: var(--accent-light);
+        box-shadow: var(--shadow-md);
+    }
+    .branch-icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+    }
+    .branch-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+    }
+    .branch-desc {
+        font-size: 0.95rem;
+        color: var(--text-secondary);
+        line-height: 1.5;
+    }
+    .selected-branch-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--accent-light);
+        border: 1px solid var(--accent);
+        border-radius: var(--radius);
+        padding: 14px 24px;
+        margin-bottom: 24px;
+        font-size: 1.1rem;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .selected-branch-bar strong {
+        color: var(--accent);
+        font-size: 1.2rem;
+    }
+    .btn-change-branch {
+        background: transparent;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        border-radius: var(--radius-sm);
+        padding: 8px 16px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: inherit;
+    }
+    .btn-change-branch:hover {
+        background: var(--accent);
+        color: white;
     }
     .form-group {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 8px;
     }
     .form-group label {
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 1.1rem;
         color: var(--text-secondary);
     }
     .form-group input[type="text"],
     .form-group input[type="number"] {
-        padding: 10px 14px;
+        padding: 14px 18px;
         border-radius: var(--radius-sm);
         border: 1px solid var(--border-color);
         background: var(--bg-elevated);
         color: var(--text-primary);
-        font-size: 1rem;
-        transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+        font-size: 1.15rem;
     }
     .form-group input:focus {
         outline: none;
@@ -234,12 +255,12 @@
     }
     .helper-text {
         color: var(--text-muted);
-        font-size: 0.8rem;
+        font-size: 0.95rem;
     }
     .error-message {
         color: var(--danger);
-        font-size: 0.8rem;
-        min-height: 18px;
+        font-size: 0.95rem;
+        min-height: 20px;
     }
     .table-responsive {
         overflow-x: auto;
@@ -247,38 +268,38 @@
     .subjects-table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
     }
     .subjects-table th,
     .subjects-table td {
-        padding: 8px 10px;
+        padding: 16px 20px;
         border-bottom: 1px solid var(--border-color);
         text-align: right;
+        font-size: 1.15rem;
     }
     .subjects-table th {
         background: var(--bg-elevated);
-        font-weight: 600;
+        font-weight: 700;
         color: var(--text-secondary);
+        font-size: 1.1rem;
     }
     .subjects-table td:first-child {
-        font-weight: 500;
+        font-weight: 600;
+        font-size: 1.15rem;
     }
     .grade-col {
         text-align: center;
-        width: 120px;
+        width: 220px;
     }
     .grade-input {
         width: 100%;
-        padding: 6px 8px;
+        padding: 12px 16px;
         text-align: center;
+        font-size: 1.15rem;
         border: 1px solid var(--border-color);
         border-radius: var(--radius-sm);
         background: var(--bg-elevated);
         color: var(--text-primary);
-    }
-    .btn-sm {
-        padding: 8px 16px;
-        font-size: 0.9rem;
     }
     .interests-fieldset {
         border: none;
@@ -286,29 +307,31 @@
     }
     .interests-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 10px;
-        margin-bottom: 8px;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 14px;
+        margin-bottom: 10px;
     }
     .interest-option {
         display: flex;
         align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
+        gap: 10px;
+        padding: 14px 18px;
         border: 1px solid var(--border-color);
         border-radius: var(--radius-sm);
         background: var(--bg-elevated);
         cursor: pointer;
         transition: background var(--transition-fast), border-color var(--transition-fast);
-        font-size: 0.9rem;
+        font-size: 1.1rem;
     }
     .interest-option:hover {
         background: var(--surface-hover);
         border-color: var(--text-muted);
     }
     .interest-option input[type="checkbox"] {
-        width: auto;
+        width: 18px;
+        height: 18px;
         margin: 0;
+        cursor: pointer;
     }
     .sr-only {
         position: absolute;
@@ -322,24 +345,25 @@
         border: 0;
     }
     .form-actions {
-        margin-top: 24px;
+        margin-top: 28px;
     }
     .btn-lg {
         width: 100%;
-        padding: 14px;
-        font-size: 1.1rem;
-        font-weight: 600;
+        padding: 18px;
+        font-size: 1.25rem;
+        font-weight: 700;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 10px;
     }
     .btn-loader {
         display: inline-flex;
         align-items: center;
+        gap: 8px;
     }
     .divider {
-        margin: 32px 0;
+        margin: 36px 0;
         border: none;
         border-top: 1px solid var(--border-color);
     }
@@ -349,34 +373,221 @@
         gap: 15px;
         justify-content: center;
     }
-    .btn-secondary {
-        background-color: var(--surface-hover);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
+
+    /* ===== Modal ===== */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
     }
-    .btn-secondary:hover {
-        background-color: var(--bg-elevated);
+    .modal-box {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 32px 28px;
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+        animation: modalFadeIn 0.2s ease;
+    }
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .modal-icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+    }
+    .modal-box h2 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: var(--text-primary);
+    }
+    .modal-box p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.6;
+        margin-bottom: 24px;
+    }
+    .modal-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .modal-btn {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
 
-    /* Responsive */
-    @media (max-width: 600px) {
+    @media (max-width: 768px) {
+        .profile-container {
+            padding: 0 14px;
+        }
+        .profile-header h1 {
+            font-size: 1.8rem;
+        }
+        .section-title {
+            font-size: 1.25rem;
+        }
+        .branch-cards {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
         .subjects-table th,
         .subjects-table td {
-            padding: 6px;
-            font-size: 0.9rem;
+            padding: 10px 8px;
+            font-size: 1rem;
         }
         .grade-col {
-            width: 90px;
+            width: 130px;
+        }
+        .grade-input {
+            padding: 8px 10px;
+            font-size: 1rem;
         }
         .interests-grid {
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+        .interest-option {
+            padding: 10px 12px;
+            font-size: 1rem;
         }
     }
 </style>
 
+<!-- تخزين البيانات من الخادم -->
+<script type="application/json" id="branch-data-json">{{ branch_data | tojson }}</script>
+<script type="application/json" id="current-branch-json">{{ (user.high_school_profile.branch if user.high_school_profile else '') | tojson }}</script>
+<script type="application/json" id="existing-grades-json">{{ (subject_grades if subject_grades else {}) | tojson }}</script>
+<script type="application/json" id="existing-interests-json">{{ (selected_interests if selected_interests else []) | tojson }}</script>
+
 <script>
 (function() {
-    // تحويل الأرقام العربية إلى إنجليزية في حقل النسبة المئوية
+    const BRANCH_DATA = JSON.parse(document.getElementById('branch-data-json').textContent);
+    const currentBranch = JSON.parse(document.getElementById('current-branch-json').textContent);
+    const existingGrades = JSON.parse(document.getElementById('existing-grades-json').textContent);
+    const existingInterests = JSON.parse(document.getElementById('existing-interests-json').textContent);
+
+    const branchInput = document.getElementById('branchInput');
+    const branchSelectorSection = document.getElementById('branchSelectorSection');
+    const dataContainer = document.getElementById('dataContainer');
+    const selectedBranchText = document.getElementById('selectedBranchText');
+    const subjectsTableBody = document.getElementById('subjectsTable');
+    const interestsGrid = document.getElementById('interestsGrid');
+
+    let pendingForm = null;
+
+    function buildSubjects(branch) {
+        const subjects = BRANCH_DATA[branch].subjects;
+        subjectsTableBody.innerHTML = '';
+        subjects.forEach(function(sub) {
+            const tr = document.createElement('tr');
+            const td1 = document.createElement('td');
+            const td2 = document.createElement('td');
+
+            const label = document.createElement('label');
+            label.setAttribute('for', 'subject_' + sub.key);
+            label.textContent = sub.name;
+            td1.appendChild(label);
+
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.id = 'subject_' + sub.key;
+            input.name = 'subject_' + sub.key;
+            input.min = '0';
+            input.max = '100';
+            input.placeholder = '0-100';
+            input.className = 'grade-input';
+            input.required = true;
+            input.value = existingGrades[sub.key] || '';
+            td2.appendChild(input);
+
+            tr.appendChild(td1);
+            tr.appendChild(td2);
+            subjectsTableBody.appendChild(tr);
+        });
+    }
+
+    function buildInterests(branch) {
+        const interests = BRANCH_DATA[branch].interests;
+        interestsGrid.innerHTML = '';
+        interests.forEach(function(item) {
+            const label = document.createElement('label');
+            label.className = 'interest-option';
+
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.name = 'interests';
+            input.value = item.value;
+            if (existingInterests.indexOf(item.value) !== -1) {
+                input.checked = true;
+            }
+            label.appendChild(input);
+
+            const span = document.createElement('span');
+            span.textContent = item.icon + ' ' + item.value;
+            label.appendChild(span);
+
+            interestsGrid.appendChild(label);
+        });
+    }
+
+    function showData(branch) {
+        branchInput.value = branch;
+        selectedBranchText.textContent = branch;
+        branchSelectorSection.style.display = 'none';
+        dataContainer.style.display = 'block';
+        buildSubjects(branch);
+        buildInterests(branch);
+    }
+
+    function hideData() {
+        branchInput.value = '';
+        dataContainer.style.display = 'none';
+        branchSelectorSection.style.display = 'block';
+        document.querySelectorAll('.branch-card').forEach(function(card) {
+            card.classList.remove('selected');
+        });
+    }
+
+    window.selectBranch = function(branch) {
+        showData(branch);
+    };
+
+    window.changeBranch = function() {
+        const gradeInputs = subjectsTableBody.querySelectorAll('input');
+        gradeInputs.forEach(function(input) { input.value = ''; });
+        const interestInputs = interestsGrid.querySelectorAll('input[type="checkbox"]');
+        interestInputs.forEach(function(input) { input.checked = false; });
+        const percentageInput = document.getElementById('overall_percentage');
+        if (percentageInput) percentageInput.value = '';
+        hideData();
+    };
+
+    if (currentBranch === 'علمي' || currentBranch === 'أدبي') {
+        const selectedCard = document.querySelector('.branch-card[data-branch="' + currentBranch + '"]');
+        if (selectedCard) selectedCard.classList.add('selected');
+        showData(currentBranch);
+    } else {
+        hideData();
+    }
+
     const percentageInput = document.getElementById('overall_percentage');
     if (percentageInput) {
         percentageInput.addEventListener('input', function() {
@@ -386,25 +597,17 @@
         });
     }
 
-    // إضافة صف مادة جديد
-    window.addSubjectRow = function() {
-        const table = document.getElementById('subjectsTable');
-        if (!table) return;
-        const row = table.insertRow();
-        const cell1 = row.insertCell(0);
-        const cell2 = row.insertCell(1);
-        cell1.innerHTML = `<input type="text" name="subject_name" placeholder="اسم المادة" style="width:100%; padding:6px 8px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-elevated); color:var(--text-primary);">`;
-        cell2.innerHTML = `<input type="number" name="subject_grade" min="0" max="100" placeholder="0-100" style="width:100%; padding:6px 8px; text-align:center; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-elevated); color:var(--text-primary);">`;
-    };
-
-    // التحقق من صحة النموذج قبل الإرسال
     const form = document.getElementById('hsForm');
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             let valid = true;
 
-            // التحقق من النسبة المئوية
+            if (!branchInput.value) {
+                showToast('❌ يرجى اختيار القسم أولاً', 'danger');
+                return;
+            }
+
             const percentage = document.getElementById('overall_percentage');
             const percentageError = document.getElementById('percentage-error');
             if (percentage && percentageError) {
@@ -417,8 +620,7 @@
                 }
             }
 
-            // التحقق من درجات المواد
-            const gradeInputs = document.querySelectorAll('#subjectsTable input[type="number"]');
+            const gradeInputs = subjectsTableBody.querySelectorAll('input[type="number"]');
             const gradesError = document.getElementById('grades-error');
             if (gradeInputs.length > 0 && gradesError) {
                 for (const input of gradeInputs) {
@@ -432,8 +634,7 @@
                 if (valid) gradesError.textContent = '';
             }
 
-            // التحقق من اختيار اهتمام واحد على الأقل
-            const interestsChecked = document.querySelectorAll('input[name="interests"]:checked');
+            const interestsChecked = interestsGrid.querySelectorAll('input[name="interests"]:checked');
             const interestsError = document.getElementById('interests-error');
             if (interestsError) {
                 if (interestsChecked.length === 0) {
@@ -446,51 +647,69 @@
 
             if (!valid) return;
 
-            // عرض حالة التحميل ومنع الإرسال المزدوج
-            const btnText = form.querySelector('.btn-text');
-            const btnLoader = form.querySelector('.btn-loader');
-            const submitBtn = document.getElementById('saveBtn');
-            if (btnText && btnLoader && submitBtn) {
-                btnText.style.display = 'none';
-                btnLoader.style.display = 'inline-flex';
-                submitBtn.disabled = true;
-            }
+            pendingForm = form;
+            document.getElementById('assessmentChoiceModal').style.display = 'flex';
+        });
+    }
 
-            // إرسال النموذج يدويًا (مع إمكانية إعادة التوجيه بعد النجاح)
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form)
-            })
-            .then(response => {
-                if (response.redirected) {
-                    showToast('✅ تم حفظ بيانات الثانوية بنجاح!', 'success');
-                    setTimeout(() => {
-                        window.location.href = response.url;
-                    }, 1500);
-                } else if (response.ok) {
-                    showToast('✅ تم الحفظ بنجاح', 'success');
-                    if (btnText && btnLoader && submitBtn) {
-                        btnText.style.display = 'inline';
-                        btnLoader.style.display = 'none';
-                        submitBtn.disabled = false;
-                    }
-                } else {
-                    showToast('❌ حدث خطأ، حاول مرة أخرى.', 'danger');
-                    if (btnText && btnLoader && submitBtn) {
-                        btnText.style.display = 'inline';
-                        btnLoader.style.display = 'none';
-                        submitBtn.disabled = false;
-                    }
-                }
-            })
-            .catch(error => {
-                showToast('❌ خطأ في الاتصال بالخادم.', 'danger');
+    // ==========================================
+    // دوال الـ Modal
+    // ==========================================
+    window.proceedWithAssessment = function() {
+        document.getElementById('assessmentChoiceModal').style.display = 'none';
+        saveFormAndRedirect(true);
+    };
+
+    window.proceedWithoutAssessment = function() {
+        document.getElementById('assessmentChoiceModal').style.display = 'none';
+        saveFormAndRedirect(false);
+    };
+
+    function saveFormAndRedirect(goToAssessment) {
+        if (!pendingForm) return;
+
+        const btnText = pendingForm.querySelector('.btn-text');
+        const btnLoader = pendingForm.querySelector('.btn-loader');
+        const submitBtn = document.getElementById('saveBtn');
+        if (btnText && btnLoader && submitBtn) {
+            btnText.style.display = 'none';
+            btnLoader.style.display = 'inline-flex';
+            submitBtn.disabled = true;
+        }
+
+        const formData = new FormData(pendingForm);
+        formData.append('next_action', goToAssessment ? 'assessment' : 'analyze');
+
+        fetch(pendingForm.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else if (response.ok) {
+                showToast('✅ تم الحفظ بنجاح', 'success');
+                setTimeout(() => {
+                    window.location.href = goToAssessment 
+                        ? '{{ url_for("student.assessment") }}'
+                        : '{{ url_for("student.analyze") }}';
+                }, 800);
+            } else {
+                showToast('❌ حدث خطأ، حاول مرة أخرى.', 'danger');
                 if (btnText && btnLoader && submitBtn) {
                     btnText.style.display = 'inline';
                     btnLoader.style.display = 'none';
                     submitBtn.disabled = false;
                 }
-            });
+            }
+        })
+        .catch(error => {
+            showToast('❌ خطأ في الاتصال بالخادم.', 'danger');
+            if (btnText && btnLoader && submitBtn) {
+                btnText.style.display = 'inline';
+                btnLoader.style.display = 'none';
+                submitBtn.disabled = false;
+            }
         });
     }
 })();

@@ -137,7 +137,7 @@
 
             <!-- القائمة الرئيسية (أزرار وأيقونات) - في اليسار -->
             <nav class="navbar-actions" id="navbarActions" aria-label="قائمة التنقل">
-                <!-- زر الرجوع (أصبح في اليسار وأكبر) -->
+                <!-- زر الرجوع -->
                 <a href="javascript:history.back()" class="btn-outline" style="margin-left: 10px;">
                     <i class="fas fa-arrow-right"></i> رجوع
                 </a>
@@ -145,11 +145,7 @@
                 <button onclick="toggleHelp()" title="مساعدة" class="icon-btn" aria-label="مساعدة">
                     <i class="fas fa-question-circle"></i>
                     <span class="icon-label">مساعدة</span>
-                </button>
-                <button onclick="toggleLanguage()" title="تغيير اللغة" class="icon-btn" aria-label="تغيير اللغة">
-                    <i class="fas fa-globe"></i>
-                    <span class="icon-label">اللغة</span>
-                </button>
+                
                 <button onclick="toggleTheme()" title="الوضع المظلم/الفاتح" class="icon-btn" aria-label="تبديل الثيم">
                     <i class="fas fa-moon"></i>
                     <span class="icon-label">الثيم</span>
@@ -184,15 +180,6 @@
 
     <!-- المحتوى الرئيسي -->
     <main class="container">
-        <!-- رسائل الفلاش -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, msg in messages %}
-                <div class="card border-{{ category if category in ['danger', 'success', 'warning'] else 'info' }}">
-                    {{ msg }}
-                </div>
-            {% endfor %}
-        {% endwith %}
-
         {% block content %}{% endblock %}
     </main>
 
@@ -200,17 +187,40 @@
     <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    
+
+    <!-- بيانات رسائل الفلاش (مخزنة كـ JSON آمن) -->
+    <script type="application/json" id="flash-messages-json">
+        [
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, msg in messages %}
+                {"category": {{ category | tojson }}, "message": {{ msg | tojson }}}{{ "," if not loop.last }}
+            {% endfor %}
+        {% endwith %}
+        ]
+    </script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // عرض رسائل الفلاش كتوست
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% for category, msg in messages %}
-                    showToast('{{ msg }}', '{{ category }}');
-                {% endfor %}
-            {% endwith %}
+            // ==========================================
+            // عرض رسائل الفلاش كـ Toast (بطريقة آمنة)
+            // ==========================================
+            try {
+                const flashData = document.getElementById('flash-messages-json');
+                if (flashData) {
+                    const messages = JSON.parse(flashData.textContent);
+                    messages.forEach(function(item) {
+                        if (typeof showToast === 'function') {
+                            showToast(item.message, item.category);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('خطأ في عرض رسائل الفلاش:', e);
+            }
 
+            // ==========================================
             // تفعيل زر القائمة للجوال
+            // ==========================================
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const navbarActions = document.getElementById('navbarActions');
             if (mobileMenuToggle && navbarActions) {
@@ -219,7 +229,6 @@
                     this.setAttribute('aria-expanded', expanded);
                     navbarActions.classList.toggle('active');
                 });
-                // إغلاق القائمة عند النقر خارجها
                 document.addEventListener('click', function(event) {
                     if (!navbarActions.contains(event.target) && event.target !== mobileMenuToggle) {
                         mobileMenuToggle.setAttribute('aria-expanded', 'false');
@@ -228,26 +237,6 @@
                 });
             }
         });
-
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            if (!container) return;
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-            toast.setAttribute('role', 'alert');
-            toast.innerHTML = `
-                <span>${message}</span>
-                <button onclick="this.parentElement.remove()" aria-label="إغلاق">&times;</button>
-            `;
-            container.appendChild(toast);
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateY(20px)';
-                    setTimeout(() => toast.remove(), 300);
-                }
-            }, 4500);
-        }
     </script>
 
     {% block scripts %}{% endblock %}
