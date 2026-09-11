@@ -1,0 +1,284 @@
+<!-- templates/university/stage.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ stage.title }} - المرحلة {{ stage.stage_number }}{% endblock %}
+
+{% block help_title %}{{ stage.title }}{% endblock %}
+{% block help_content %}ادرس المحتوى، ثم ابدأ الاختبار.{% endblock %}
+{% block help_step %}شاهد الفيديوهات، ثم اضغط "ابدأ الاختبار".{% endblock %}
+
+{% block content %}
+<div class="uni-stage-container">
+
+    <!-- رأس المرحلة -->
+    <header class="stage-header-card">
+        <div class="stage-number-badge">المرحلة {{ stage.stage_number }}</div>
+        <h1>{{ stage.title }}</h1>
+        <p>{{ stage.description }}</p>
+    </header>
+
+    <!-- الأهداف -->
+    <section class="content-section">
+        <h2 class="section-title">🎯 ماذا ستتعلم؟</h2>
+        <ul class="objectives-list">
+            {% for obj in objectives %}
+            <li><i class="fas fa-check-circle"></i> {{ obj }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <!-- الفيديوهات -->
+    <section class="content-section">
+        <h2 class="section-title">🎥 مصادر التعلم</h2>
+        <div class="videos-grid">
+            {% if stage.youtube_ar %}
+            <a href="{{ stage.youtube_ar }}" target="_blank" class="video-card">
+                <div class="video-icon">🇸🇦</div>
+                <div class="video-info">
+                    <div class="video-title">كورس عربي</div>
+                    <div class="video-desc">مشاهدة الفيديو التعليمي بالعربية</div>
+                </div>
+                <i class="fas fa-external-link-alt video-arrow"></i>
+            </a>
+            {% endif %}
+
+            {% if stage.youtube_en %}
+            <a href="{{ stage.youtube_en }}" target="_blank" class="video-card">
+                <div class="video-icon">🇬🇧</div>
+                <div class="video-info">
+                    <div class="video-title">English Course</div>
+                    <div class="video-desc">Watch the English video tutorial</div>
+                </div>
+                <i class="fas fa-external-link-alt video-arrow"></i>
+            </a>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- التطبيق العملي -->
+    {% if stage.practical_task %}
+    <section class="content-section">
+        <h2 class="section-title">💻 التطبيق العملي</h2>
+        <div class="task-box">
+            <i class="fas fa-tasks"></i>
+            <p>{{ stage.practical_task }}</p>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- تعليمات الاختبار -->
+    <section class="content-section">
+        <h2 class="section-title">📝 الاختبار</h2>
+        <div class="quiz-info-box">
+            <div class="info-item">
+                <i class="fas fa-list-ol"></i>
+                <span>10 أسئلة عشوائية</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-trophy"></i>
+                <span>تحتاج 7 إجابات صحيحة للنجاح</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-redo"></i>
+                <span>يمكنك إعادة المحاولة</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- أزرار الإجراء -->
+    <div class="stage-actions-bottom">
+        <a href="{{ url_for('university.career_path', path_slug=career_path.slug) }}" class="btn btn-outline">
+            <i class="fas fa-arrow-right"></i> العودة للمسار
+        </a>
+        <a href="{{ url_for('university.quiz', stage_id=stage.id) }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-play"></i> ابدأ الاختبار
+        </a>
+    </div>
+
+</div>
+
+<style>
+    .uni-stage-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .stage-header-card {
+        background: var(--bg-card);
+        border: 2px solid var(--accent);
+        border-radius: var(--radius-lg);
+        padding: 40px 32px;
+        margin-bottom: 32px;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+    }
+    .stage-number-badge {
+        display: inline-block;
+        background: var(--accent-light);
+        color: var(--accent);
+        padding: 8px 20px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 16px;
+    }
+    .stage-header-card h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+    .stage-header-card p {
+        color: var(--text-secondary);
+        font-size: 1.15rem;
+        line-height: 1.7;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .content-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 28px;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-sm);
+    }
+    .section-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+
+    /* قائمة الأهداف */
+    .objectives-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .objectives-list li {
+        padding: 12px 16px;
+        margin-bottom: 8px;
+        background: var(--bg-elevated);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.05rem;
+        border-inline-start: 4px solid var(--accent);
+    }
+    .objectives-list li i {
+        color: var(--accent);
+        font-size: 1.1rem;
+    }
+
+    /* الفيديوهات */
+    .videos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+    }
+    .video-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+        background: var(--bg-elevated);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius);
+        text-decoration: none;
+        color: inherit;
+        transition: all var(--transition);
+    }
+    .video-card:hover {
+        border-color: var(--accent);
+        background: var(--accent-light);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+    .video-icon {
+        font-size: 2.5rem;
+        flex-shrink: 0;
+    }
+    .video-info {
+        flex: 1;
+    }
+    .video-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+        color: var(--text-primary);
+    }
+    .video-desc {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .video-arrow {
+        color: var(--accent);
+        font-size: 1.2rem;
+    }
+
+    /* التطبيق العملي */
+    .task-box {
+        display: flex;
+        gap: 16px;
+        background: var(--accent-light);
+        border-inline-start: 4px solid var(--accent);
+        border-radius: var(--radius);
+        padding: 20px 24px;
+        align-items: flex-start;
+    }
+    .task-box i {
+        font-size: 1.8rem;
+        color: var(--accent);
+        flex-shrink: 0;
+    }
+    .task-box p {
+        margin: 0;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--text-primary);
+    }
+
+    /* معلومات الاختبار */
+    .quiz-info-box {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+    }
+    .info-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px;
+        background: var(--bg-elevated);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        font-size: 1rem;
+    }
+    .info-item i {
+        font-size: 1.3rem;
+        color: var(--accent);
+    }
+
+    /* أزرار الأسفل */
+    .stage-actions-bottom {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 32px 0;
+        flex-wrap: wrap;
+    }
+    .btn-lg {
+        padding: 16px 40px;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+    @media (max-width: 600px) {
+        .stage-header-card h1 { font-size: 1.6rem; }
+        .stage-actions-bottom { flex-direction: column; }
+        .stage-actions-bottom .btn { width: 100%; }
+    }
+</style>
+{% endblock %}

@@ -57,12 +57,12 @@ class AnalysisEngine:
                 }
             ]
         },
-        {
+                {
             "title": "الذكاء الاصطناعي (Artificial Intelligence)",
             "branch": "علمي",
             "min_percentage": 75.0,
             "subject_weights": {"math": 0.50, "physics": 0.25, "english": 0.25},
-            "keywords": ["ذكاء اصطناعي", "تعلم آلة", "روبوتات", "خوارزميات", "رياضيات", "برمجة"],
+            "keywords": ["ذكاء اصطناعي", "تعلم آلة", "رؤية حاسوبية", "معالجة لغة", "خوارزميات", "رياضيات", "برمجة"],
             "aptitude_profile": {
                 "analytical": 0.95, "technology": 0.9, "research": 0.8, "problem_solving": 0.85,
                 "practical": 0.6, "creativity": 0.7, "communication": 0.2, "leadership": 0.1,
@@ -70,25 +70,25 @@ class AnalysisEngine:
             },
             "career_paths": [
                 {
-                    "title": "مهندس تعلم آلة (Machine Learning Engineer)",
-                    "description": "يصمم ويطور نماذج التعلم الآلي ويضبطها لتعمل بكفاءة في التطبيقات الواقعية.",
+                    "title": "مهندس تعلم آلي (Machine Learning Engineer)",
+                    "description": "مهندس يعمل على بناء وتدريب وتحسين ونشر نماذج التعلم الآلي والتعلم العميق لحل مشكلات واقعية.",
                     "salary": "15,000 - 30,000 ريال سعودي",
-                    "skills": ["Python", "TensorFlow/PyTorch", "ML Algorithms", "Data Preprocessing", "Deployment", "SQL"],
-                    "benefits": "مجال ساخن جداً، رواتب عالية، إمكانية العمل في الشركات الناشئة والكبيرة."
+                    "skills": ["Python", "Machine Learning", "Deep Learning", "PyTorch", "TensorFlow", "Scikit-learn", "SQL", "MLOps"],
+                    "benefits": "طلب مرتفع، رواتب قوية، وفرص واسعة في مختلف قطاعات الذكاء الاصطناعي."
                 },
                 {
-                    "title": "باحث في الذكاء الاصطناعي (AI Researcher)",
-                    "description": "يبتكر خوارزميات ونماذج جديدة للذكاء الاصطناعي، وينشر أبحاثاً في المجلات العلمية.",
-                    "salary": "20,000 - 40,000 ريال سعودي",
-                    "skills": ["Python", "رياضيات متقدمة", "إحصاء", "Deep Learning", "قراءة الأبحاث", "الكتابة العلمية"],
-                    "benefits": "فرص أكاديمية وبحثية، مكانة مرموقة، إمكانية العمل في جامعات ومراكز بحثية."
+                    "title": "مهندس رؤية حاسوبية (Computer Vision Engineer)",
+                    "description": "مهندس يطوّر أنظمة قادرة على فهم وتحليل الصور والفيديو باستخدام تقنيات الرؤية الحاسوبية والتعلم العميق.",
+                    "salary": "14,000 - 28,000 ريال سعودي",
+                    "skills": ["Python", "PyTorch", "OpenCV", "YOLO", "Computer Vision", "CNNs", "Image Processing"],
+                    "benefits": "فرص قوية في الروبوتات، السيارات ذاتية القيادة، الأمن، الصناعة والأنظمة الذكية."
                 },
                 {
-                    "title": "مهندس روبوتات (Robotics Engineer)",
-                    "description": "يبرمج ويصمم الروبوتات الذكية التي تتفاعل مع البيئة، باستخدام الذكاء الاصطناعي والتحكم الآلي.",
-                    "salary": "12,000 - 25,000 ريال سعودي",
-                    "skills": ["Python/C++", "ROS", "Control Systems", "Computer Vision", "Sensors", "Embedded Systems"],
-                    "benefits": "عمل مشوق وملموس، تطبيقات في الصناعة والطب والخدمات."
+                    "title": "مهندس معالجة لغة طبيعية (NLP Engineer)",
+                    "description": "مهندس يطوّر أنظمة قادرة على فهم ومعالجة اللغة البشرية باستخدام تقنيات NLP والتعلم العميق.",
+                    "salary": "15,000 - 30,000 ريال سعودي",
+                    "skills": ["Python", "Transformers", "Hugging Face", "LLMs", "PyTorch", "NLP", "RAG", "Embeddings"],
+                    "benefits": "مجال سريع النمو مع فرص قوية في LLMs، الذكاء التوليدي، المساعدات الذكية وتحليل النصوص."
                 }
             ]
         },

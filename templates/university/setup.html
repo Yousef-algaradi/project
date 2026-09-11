@@ -1,0 +1,211 @@
+<!-- templates/university/setup.html -->
+{% extends "university/base_university.html" %}
+
+{% block title %}Home - المستشار الأكاديمي{% endblock %}
+
+{% block help_title %}اختر تخصصك الجامعي{% endblock %}
+{% block help_content %}اختر تخصصك، ثم اختر المسار المهني الذي تريد تعلمه.{% endblock %}
+{% block help_step %}اضغط "ابدأ رحلتك" للانتقال إلى Dashboard.{% endblock %}
+
+{% block university_content %}
+
+<header class="setup-header">
+    <h1>🎓 اختر تخصصك ومسارك</h1>
+    <p>اختر تخصصك أولاً، ثم اختر المسار المهني الذي تريد تعلمه.</p>
+</header>
+
+<form method="POST" action="{{ url_for('university.save_setup') }}" id="setupForm">
+    
+    <!-- الخطوة 1: اختر التخصص -->
+    <section class="setup-section">
+        <h2 class="setup-title">1️⃣ اختر تخصصك الجامعي</h2>
+        <div class="majors-grid">
+            {% for major in majors %}
+            <label class="major-card {% if uni_profile and uni_profile.major == major.key %}selected{% endif %}">
+                <input type="radio" name="major" value="{{ major.key }}" 
+                       {% if uni_profile and uni_profile.major == major.key %}checked{% endif %}
+                       onchange="selectMajor('{{ major.key }}')">
+                <div class="major-icon">{{ major.icon }}</div>
+                <div class="major-name">{{ major.name }}</div>
+            </label>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- الخطوة 2: اختر المسار -->
+    <section class="setup-section" id="trackSection" style="display: none;">
+        <h2 class="setup-title">2️⃣ اختر المسار المهني</h2>
+        <div class="tracks-grid" id="tracksGrid"></div>
+        <p class="setup-note">ⓘ يمكنك تجربة أكثر من مسار لاحقاً.</p>
+    </section>
+
+    <!-- زر البدء -->
+    <div class="form-actions" id="submitSection" style="display: none;">
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fas fa-rocket"></i> ابدأ رحلتك الجامعية
+        </button>
+    </div>
+</form>
+
+<style>
+    .setup-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    .setup-header h1 {
+        font-size: 2.6rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+    .setup-header p {
+        color: var(--text-secondary);
+        font-size: 1.2rem;
+    }
+
+    .setup-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 36px 32px;
+        margin-bottom: 28px;
+        box-shadow: var(--shadow-sm);
+    }
+    .setup-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .majors-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+    }
+    .major-card {
+        background: var(--bg-elevated);
+        border: 3px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 36px 20px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: block;
+    }
+    .major-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-md);
+    }
+    .major-card.selected {
+        border-color: var(--accent);
+        background: var(--accent-light);
+        box-shadow: var(--shadow-lg);
+    }
+    .major-card input[type="radio"] { display: none; }
+    .major-icon { font-size: 3.5rem; margin-bottom: 14px; }
+    .major-name { font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
+
+    .tracks-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+    }
+    .track-card {
+        background: var(--bg-elevated);
+        border: 3px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: block;
+    }
+    .track-card:hover {
+        border-color: var(--accent);
+        background: var(--surface-hover);
+        transform: translateY(-4px);
+    }
+    .track-card.selected {
+        border-color: var(--accent);
+        background: var(--accent-light);
+        box-shadow: var(--shadow-md);
+    }
+    .track-card input[type="radio"] { display: none; }
+    .track-name { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
+    .track-desc { font-size: 1rem; color: var(--text-secondary); line-height: 1.6; }
+
+    .setup-note {
+        color: var(--text-muted);
+        margin-top: 16px;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .form-actions {
+        text-align: center;
+        margin-top: 32px;
+    }
+    .btn-lg {
+        padding: 20px 60px;
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+</style>
+
+<script>
+    const MAJOR_TRACKS = {
+    'data_science': [
+        { key: 'data-analyst', name: '📊 محلل بيانات', desc: '...' },
+        { key: 'data-scientist', name: '🤖 عالم بيانات', desc: '...' },
+        { key: 'data-engineer', name: '⚙️ مهندس بيانات', desc: '...' }
+    ],
+    'ai': [
+        { key: 'ml-engineer', name: '🤖 مهندس تعلم آلي', desc: '...' },
+        { key: 'cv-engineer', name: '👁️ مهندس رؤية حاسوبية', desc: '...' },
+        { key: 'nlp-engineer', name: '💬 مهندس NLP', desc: '...' }
+    ],
+    'cyber': [
+    { key: 'security-analyst', name: '🛡️ محلل أمن سيبراني', desc: 'تحليل التهديدات، مراقبة SOC، والاستجابة للحوادث.' },
+    { key: 'penetration-tester', name: '🔐 مختبر اختراق', desc: 'اختبار اختراق تطبيقات الويب والشبكات وActive Directory.' },
+    { key: 'network-security-engineer', name: '🔒 مهندس أمن شبكات', desc: 'تصميم شبكات آمنة، جدران حماية، VPN، وأمن السحابة.' }
+]
+};
+
+    function selectMajor(majorKey) {
+        document.querySelectorAll('.major-card').forEach(c => c.classList.remove('selected'));
+        event.target.closest('.major-card').classList.add('selected');
+
+        const tracks = MAJOR_TRACKS[majorKey] || [];
+        const tracksGrid = document.getElementById('tracksGrid');
+        tracksGrid.innerHTML = '';
+
+        tracks.forEach((track, idx) => {
+            const label = document.createElement('label');
+            label.className = 'track-card' + (idx === 0 ? ' selected' : '');
+            label.innerHTML = `
+                <input type="radio" name="preferred_track" value="${track.key}" 
+                       ${idx === 0 ? 'checked' : ''}
+                       onchange="selectTrack(this)">
+                <div class="track-name">${track.name}</div>
+                <div class="track-desc">${track.desc}</div>
+            `;
+            tracksGrid.appendChild(label);
+        });
+
+        document.getElementById('trackSection').style.display = 'block';
+        document.getElementById('submitSection').style.display = 'block';
+    }
+
+    function selectTrack(input) {
+        document.querySelectorAll('.track-card').forEach(c => c.classList.remove('selected'));
+        input.closest('.track-card').classList.add('selected');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectedMajor = document.querySelector('input[name="major"]:checked');
+        if (selectedMajor) {
+            selectedMajor.dispatchEvent(new Event('change'));
+        }
+    });
+</script>
+{% endblock %}

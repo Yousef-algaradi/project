@@ -31,7 +31,7 @@
                 <h3 class="subject-name">
                     <i class="fas fa-brain"></i> المرحلة 1: أسئلة الميول
                 </h3>
-                <button class="btn-skip-subject" onclick="skipAllAptitude()">
+                <button type="button" class="btn-skip-subject" onclick="skipAllAptitude()">
                     <i class="fas fa-forward"></i> تخطي الميول بالكامل
                 </button>
             </div>
@@ -43,15 +43,16 @@
             </div>
         </div>
 
+        <!-- ✅ الأزرار بالترتيب المطلوب: حفظ وتحليل → تخطي (أحمر) → السابق -->
         <div class="assessment-actions">
-            <button class="btn btn-outline" onclick="skipAptitudeQuestion()">
+            <button type="button" class="btn btn-primary btn-save-analyze" onclick="finishAndAnalyze()">
+                <i class="fas fa-rocket"></i> حفظ وتحليل
+            </button>
+            <button type="button" class="btn btn-danger btn-skip" onclick="skipAptitudeQuestion()">
                 <i class="fas fa-forward"></i> تخطي السؤال
             </button>
-            <button class="btn btn-outline" onclick="prevAptitudeQuestion()" id="aptitudePrevBtn" style="display:none;">
-                <i class="fas fa-arrow-right"></i> السابق
-            </button>
-            <button class="btn btn-primary" onclick="finishAndAnalyze()">
-                <i class="fas fa-rocket"></i> حفظ وتحليل
+            <button type="button" class="btn btn-outline" onclick="prevAptitudeQuestion()" id="aptitudePrevBtn" style="display:none;">
+                <i class="fas fa-arrow-right"></i> السؤال السابق
             </button>
         </div>
     </div>
@@ -63,7 +64,7 @@
                 <h3 class="subject-name" id="currentSubjectName">
                     <i class="fas fa-book"></i> -
                 </h3>
-                <button class="btn-skip-subject" onclick="skipCurrentSubject()">
+                <button type="button" class="btn-skip-subject" onclick="skipCurrentSubject()">
                     <i class="fas fa-forward"></i> تخطي المادة
                 </button>
             </div>
@@ -75,25 +76,26 @@
             </div>
         </div>
 
+        <!-- ✅ الأزرار بالترتيب المطلوب -->
         <div class="assessment-actions">
-            <button class="btn btn-outline" onclick="skipSubjectQuestion()">
+            <button type="button" class="btn btn-primary btn-save-analyze" onclick="finishAndAnalyze()">
+                <i class="fas fa-rocket"></i> حفظ وتحليل
+            </button>
+            <button type="button" class="btn btn-danger btn-skip" onclick="skipSubjectQuestion()">
                 <i class="fas fa-forward"></i> تخطي السؤال
             </button>
-            <button class="btn btn-outline" onclick="prevSubjectQuestion()" id="subjectPrevBtn" style="display:none;">
-                <i class="fas fa-arrow-right"></i> السابق
-            </button>
-            <button class="btn btn-primary" onclick="finishAndAnalyze()">
-                <i class="fas fa-rocket"></i> حفظ وتحليل
+            <button type="button" class="btn btn-outline" onclick="prevSubjectQuestion()" id="subjectPrevBtn" style="display:none;">
+                <i class="fas fa-arrow-right"></i> السؤال السابق
             </button>
         </div>
     </div>
 
-    <!-- قسم الإرسال النهائي (يظهر فقط عند إنهاء كل الأسئلة) -->
+    <!-- قسم الإرسال النهائي -->
     <div id="submitSection" style="display:none; text-align:center; margin-top: 30px;">
         <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 1.1rem;">
             ✅ اكتمل الاختبار. اضغط للحصول على التوصيات.
         </p>
-        <button class="btn btn-primary btn-lg" onclick="submitAssessment()" id="submitBtn">
+        <button type="button" class="btn btn-primary btn-lg" onclick="submitAssessment()" id="submitBtn">
             <i class="fas fa-chart-line"></i> حفظ النتائج وعرض التوصيات
         </button>
     </div>
@@ -105,216 +107,209 @@
 <script type="application/json" id="branch-json">{{ branch | tojson }}</script>
 
 <style>
-    .assessment-container {
-        max-width: 850px;
-        margin: 0 auto;
-        padding: 0 16px;
-    }
-    .assessment-header {
-        text-align: center;
-        margin-bottom: 24px;
-    }
-    .assessment-header h1 {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-    .assessment-header p {
-        color: var(--text-secondary);
-        font-size: 1.1rem;
-    }
+    .assessment-container { max-width: 850px; margin: 0 auto; padding: 0 16px; }
+    .assessment-header { text-align: center; margin-bottom: 24px; }
+    .assessment-header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; }
+    .assessment-header p { color: var(--text-secondary); font-size: 1.1rem; }
     .branch-indicator {
-        display: inline-block;
-        margin-top: 12px;
-        padding: 8px 20px;
-        background: var(--accent-light);
-        color: var(--accent);
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 1.05rem;
+        display: inline-block; margin-top: 12px; padding: 8px 20px;
+        background: var(--accent-light); color: var(--accent);
+        border-radius: 20px; font-weight: 600; font-size: 1.05rem;
     }
     .progress-container {
-        background: var(--bg-elevated);
-        border-radius: 20px;
-        height: 12px;
-        margin-bottom: 8px;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
+        background: var(--bg-elevated); border-radius: 20px; height: 12px;
+        margin-bottom: 8px; overflow: hidden; border: 1px solid var(--border-color);
     }
     .progress-bar {
-        height: 100%;
-        background: var(--accent);
-        border-radius: 20px;
+        height: 100%; background: var(--accent); border-radius: 20px;
         transition: width 0.3s ease;
     }
     .progress-text {
-        text-align: center;
-        color: var(--text-muted);
-        font-size: 1rem;
-        margin-bottom: 28px;
+        text-align: center; color: var(--text-muted);
+        font-size: 1rem; margin-bottom: 28px;
     }
-
-    /* بطاقة موحدة (الميول + المواد) */
     .subject-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
-        margin-bottom: 20px;
-        overflow: hidden;
+        background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+        margin-bottom: 20px; overflow: hidden;
     }
     .subject-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 18px 28px;
-        background: var(--bg-elevated);
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 18px 28px; background: var(--bg-elevated);
         border-bottom: 1px solid var(--border-color);
-        gap: 12px;
-        flex-wrap: wrap;
+        gap: 12px; flex-wrap: wrap;
     }
     .subject-name {
-        margin: 0;
-        font-size: 1.4rem;
-        font-weight: 700;
-        color: var(--accent);
-        display: flex;
-        align-items: center;
-        gap: 10px;
+        margin: 0; font-size: 1.4rem; font-weight: 700;
+        color: var(--accent); display: flex; align-items: center; gap: 10px;
     }
     .btn-skip-subject {
-        background: transparent;
-        border: 1px solid var(--danger);
-        color: var(--danger);
-        padding: 10px 18px;
-        border-radius: var(--radius-sm);
-        cursor: pointer;
-        font-weight: 600;
-        font-size: 0.95rem;
-        transition: all var(--transition-fast);
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-family: inherit;
+        background: transparent; border: 1px solid var(--danger);
+        color: var(--danger); padding: 10px 18px; border-radius: var(--radius-sm);
+        cursor: pointer; font-weight: 600; font-size: 0.95rem;
+        transition: all var(--transition-fast); display: inline-flex;
+        align-items: center; gap: 6px; font-family: inherit;
     }
-    .btn-skip-subject:hover {
-        background: var(--danger);
-        color: white;
-    }
-    .subject-question-body {
-        padding: 32px 36px;
-    }
+    .btn-skip-subject:hover { background: var(--danger); color: white; }
+    .subject-question-body { padding: 32px 36px; }
     .question-difficulty {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 12px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        margin-bottom: 16px;
-        background: var(--accent-light);
-        color: var(--accent);
+        display: inline-block; padding: 6px 14px; border-radius: 12px;
+        font-size: 0.9rem; font-weight: 600; margin-bottom: 16px;
+        background: var(--accent-light); color: var(--accent);
         border: 1px solid var(--accent);
     }
-    .question-difficulty.سهل {
-        background: #d1fae5;
-        color: #065f46;
-        border-color: #10b981;
-    }
-    .question-difficulty.متوسط {
-        background: #fef3c7;
-        color: #92400e;
-        border-color: #f59e0b;
-    }
-    .question-difficulty.صعب {
-        background: #fee2e2;
-        color: #991b1b;
-        border-color: #ef4444;
-    }
     .question-text {
-        font-size: 1.55rem;
-        font-weight: 600;
-        margin-bottom: 24px;
-        line-height: 1.6;
-        color: var(--text-primary);
+        font-size: 1.55rem; font-weight: 600; margin-bottom: 24px;
+        line-height: 1.6; color: var(--text-primary);
     }
-    .options-list {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-    }
+    .options-list { display: flex; flex-direction: column; gap: 14px; }
     .option-item {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 16px 20px;
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        background: var(--bg-elevated);
+        display: flex; align-items: center; gap: 14px;
+        padding: 16px 20px; border: 1px solid var(--border-color);
+        border-radius: var(--radius-md); background: var(--bg-elevated);
         cursor: pointer;
         transition: background var(--transition-fast), border-color var(--transition-fast);
-        font-size: 1.1rem;
-        line-height: 1.5;
+        font-size: 1.1rem; line-height: 1.5;
     }
-    .option-item:hover {
-        background: var(--surface-hover);
-        border-color: var(--text-muted);
-    }
-    .option-item.selected {
-        border-color: var(--accent);
-        background: var(--accent-light);
-    }
+    .option-item:hover { background: var(--surface-hover); border-color: var(--text-muted); }
+    .option-item.selected { border-color: var(--accent); background: var(--accent-light); }
     .option-item input[type="radio"] {
-        width: 20px;
-        height: 20px;
-        margin: 0;
-        cursor: pointer;
-        flex-shrink: 0;
+        width: 20px; height: 20px; margin: 0; cursor: pointer; flex-shrink: 0;
     }
+
+    /* ==========================================
+   أزرار التحكم - نسخة محسّنة
+   ========================================== */
+.assessment-actions {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 28px;
+    padding: 16px 8px;
+}
+
+.assessment-actions .btn {
+    padding: 14px 32px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 50px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.3px;
+    min-width: 160px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.assessment-actions .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.assessment-actions .btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.assessment-actions .btn i {
+    font-size: 1.15rem;
+    transition: transform 0.25s ease;
+}
+
+.assessment-actions .btn:hover i {
+    transform: scale(1.15);
+}
+
+/* ==========================================
+   زر "حفظ وتحليل" - الأخضر الأساسي
+   ========================================== */
+.btn-save-analyze {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    border-color: #10b981;
+}
+
+.btn-save-analyze:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    border-color: #059669;
+}
+
+/* ==========================================
+   زر "تخطي السؤال" - الأحمر
+   ========================================== */
+.btn-skip {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #ffffff;
+    border-color: #ef4444;
+}
+
+.btn-skip:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    border-color: #dc2626;
+}
+
+/* ==========================================
+   زر "السؤال السابق" - الرمادي الثانوي
+   ========================================== */
+.btn-outline {
+    background: var(--bg-card, #ffffff);
+    color: var(--text-primary, #1e293b);
+    border-color: var(--border-color, #e2e8f0);
+}
+
+.btn-outline:hover {
+    background: var(--bg-elevated, #f8fafc);
+    border-color: var(--accent, #10b981);
+    color: var(--accent, #10b981);
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+@media (max-width: 600px) {
     .assessment-actions {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
+        gap: 10px;
         margin-top: 20px;
-        padding: 0 4px;
+        padding: 12px 4px;
     }
+    
     .assessment-actions .btn {
-        padding: 12px 24px;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+        min-width: 0;
+        flex: 1 1 100%;
+        max-width: 100%;
+    }
+    
+    .assessment-actions .btn i {
         font-size: 1rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
     }
-    .btn-lg {
-        padding: 16px 40px;
-        font-size: 1.15rem;
-        font-weight: 700;
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+    .assessment-actions .btn {
+        padding: 13px 24px;
+        font-size: 1rem;
+        min-width: 140px;
     }
-    @media (max-width: 480px) {
-        .assessment-header h1 { font-size: 1.6rem; }
-        .subject-name { font-size: 1.15rem; }
-        .btn-skip-subject { font-size: 0.8rem; padding: 6px 12px; }
-        .question-text { font-size: 1.2rem; }
-        .option-item { padding: 12px 14px; font-size: 0.95rem; }
-        .subject-question-body { padding: 20px; }
-        .subject-card-header { padding: 14px 16px; }
-        .assessment-actions .btn { padding: 10px 16px; font-size: 0.9rem; }
-    }
+}
 </style>
 
 <script>
 (function () {
-    // ==========================================
-    // قراءة البيانات
-    // ==========================================
     const aptitudeQuestions = JSON.parse(document.getElementById('aptitude-questions-json').textContent);
     const subjectQuestions = JSON.parse(document.getElementById('subject-questions-json').textContent);
     const branch = JSON.parse(document.getElementById('branch-json').textContent);
 
-    // ==========================================
-    // الحالة
-    // ==========================================
     const state = {
         phase: 'aptitude',
         aptitudeIndex: 0,
@@ -333,9 +328,6 @@
     }
     const totalQuestions = totalAptitudeQuestions + totalSubjectQuestions;
 
-    // ==========================================
-    // التقدم
-    // ==========================================
     function updateProgress() {
         let completed = 0;
         if (state.phase === 'aptitude') {
@@ -377,15 +369,11 @@
         return count;
     }
 
-    // ==========================================
-    // عرض أسئلة الميول
-    // ==========================================
     function renderAptitudeQuestion() {
         if (state.aptitudeIndex >= aptitudeQuestions.length) {
             goToSubjectPhase();
             return;
         }
-
         const q = aptitudeQuestions[state.aptitudeIndex];
         document.getElementById('aptitudeQuestionNumber').textContent =
             `سؤال ${state.aptitudeIndex + 1} من ${aptitudeQuestions.length}`;
@@ -396,32 +384,23 @@
         q.options.forEach(option => {
             const label = document.createElement('label');
             label.className = 'option-item' + (state.aptitudeAnswers[q.id] === option.id ? ' selected' : '');
-
             const input = document.createElement('input');
             input.type = 'radio';
             input.name = 'apt_' + q.id;
             input.value = option.id;
-            if (state.aptitudeAnswers[q.id] === option.id) {
-                input.checked = true;
-            }
+            if (state.aptitudeAnswers[q.id] === option.id) input.checked = true;
             label.appendChild(input);
-
             const span = document.createElement('span');
             span.textContent = option.text;
             label.appendChild(span);
-
             label.addEventListener('click', function (e) {
-                if (e.target.tagName !== 'INPUT') {
-                    selectAptitudeOption(q.id, option.id);
-                }
+                if (e.target.tagName !== 'INPUT') selectAptitudeOption(q.id, option.id);
             });
-
             optionsContainer.appendChild(label);
         });
 
         document.getElementById('aptitudePrevBtn').style.display =
             state.aptitudeIndex > 0 ? 'inline-flex' : 'none';
-
         updateProgress();
     }
 
@@ -429,13 +408,8 @@
         state.aptitudeAnswers[questionId] = optionId;
         document.querySelectorAll('#aptitudeOptionsList .option-item').forEach(item => item.classList.remove('selected'));
         const selectedInput = document.querySelector(`input[name="apt_${questionId}"][value="${optionId}"]`);
-        if (selectedInput) {
-            selectedInput.closest('.option-item').classList.add('selected');
-        }
-        setTimeout(() => {
-            state.aptitudeIndex++;
-            renderAptitudeQuestion();
-        }, 200);
+        if (selectedInput) selectedInput.closest('.option-item').classList.add('selected');
+        setTimeout(() => { state.aptitudeIndex++; renderAptitudeQuestion(); }, 200);
     }
 
     window.skipAptitudeQuestion = function () {
@@ -458,9 +432,6 @@
         goToSubjectPhase();
     };
 
-    // ==========================================
-    // حفظ وتحليل → /analyze
-    // ==========================================
     window.finishAndAnalyze = async function () {
         const cleanAptitudeAnswers = {};
         for (const [k, v] of Object.entries(state.aptitudeAnswers)) {
@@ -470,7 +441,6 @@
         for (const [k, v] of Object.entries(state.subjectAnswers)) {
             if (!k.endsWith('_skipped')) cleanSubjectAnswers[k] = v;
         }
-
         try {
             const response = await fetch('{{ url_for("student.submit_assessment") }}', {
                 method: 'POST',
@@ -480,7 +450,6 @@
                     subject_answers: cleanSubjectAnswers
                 })
             });
-
             const data = await response.json();
             if (data.success) {
                 showToast('✅ تم الحفظ، جاري التحليل...', 'success');
@@ -495,14 +464,8 @@
         }
     };
 
-    // ==========================================
-    // الانتقال للمواد
-    // ==========================================
     function goToSubjectPhase() {
-        if (state.subjectKeys.length === 0) {
-            showSubmitSection();
-            return;
-        }
+        if (state.subjectKeys.length === 0) { showSubmitSection(); return; }
         state.phase = 'subject';
         state.subjectIndex = 0;
         state.questionIndex = 0;
@@ -511,68 +474,43 @@
         renderSubjectQuestion();
     }
 
-    // ==========================================
-    // عرض أسئلة المواد
-    // ==========================================
     function renderSubjectQuestion() {
-        if (state.subjectIndex >= state.subjectKeys.length) {
-            showSubmitSection();
-            return;
-        }
-
+        if (state.subjectIndex >= state.subjectKeys.length) { showSubmitSection(); return; }
         const subjKey = state.subjectKeys[state.subjectIndex];
         const subjData = subjectQuestions[subjKey];
         const questions = subjData.questions;
-
         if (state.questionIndex >= questions.length) {
-            state.subjectIndex++;
-            state.questionIndex = 0;
-            renderSubjectQuestion();
-            return;
+            state.subjectIndex++; state.questionIndex = 0;
+            renderSubjectQuestion(); return;
         }
-
         const q = questions[state.questionIndex];
-
         document.getElementById('currentSubjectName').innerHTML =
             `<i class="fas fa-book"></i> ${subjData.name}`;
-
         const diffEl = document.getElementById('questionDifficulty');
         diffEl.textContent = 'مستوى: ' + q.difficulty;
         diffEl.className = 'question-difficulty ' + q.difficulty;
-
         document.getElementById('subjectQuestionText').textContent = q.text;
         const optionsContainer = document.getElementById('subjectOptionsList');
         optionsContainer.innerHTML = '';
-
         q.options.forEach(option => {
             const label = document.createElement('label');
             label.className = 'option-item' + (state.subjectAnswers[q.id] === option.id ? ' selected' : '');
-
             const input = document.createElement('input');
             input.type = 'radio';
             input.name = 'subj_' + q.id;
             input.value = option.id;
-            if (state.subjectAnswers[q.id] === option.id) {
-                input.checked = true;
-            }
+            if (state.subjectAnswers[q.id] === option.id) input.checked = true;
             label.appendChild(input);
-
             const span = document.createElement('span');
             span.textContent = option.text;
             label.appendChild(span);
-
             label.addEventListener('click', function (e) {
-                if (e.target.tagName !== 'INPUT') {
-                    selectSubjectOption(q.id, option.id);
-                }
+                if (e.target.tagName !== 'INPUT') selectSubjectOption(q.id, option.id);
             });
-
             optionsContainer.appendChild(label);
         });
-
         document.getElementById('subjectPrevBtn').style.display =
             (state.questionIndex > 0 || state.subjectIndex > 0) ? 'inline-flex' : 'none';
-
         updateProgress();
     }
 
@@ -580,13 +518,8 @@
         state.subjectAnswers[questionId] = optionId;
         document.querySelectorAll('#subjectOptionsList .option-item').forEach(item => item.classList.remove('selected'));
         const selectedInput = document.querySelector(`input[name="subj_${questionId}"][value="${optionId}"]`);
-        if (selectedInput) {
-            selectedInput.closest('.option-item').classList.add('selected');
-        }
-        setTimeout(() => {
-            state.questionIndex++;
-            renderSubjectQuestion();
-        }, 200);
+        if (selectedInput) selectedInput.closest('.option-item').classList.add('selected');
+        setTimeout(() => { state.questionIndex++; renderSubjectQuestion(); }, 200);
     }
 
     window.skipSubjectQuestion = function () {
@@ -610,28 +543,16 @@
 
     window.skipCurrentSubject = function () {
         const subjKey = state.subjectKeys[state.subjectIndex];
-
         for (const q of subjectQuestions[subjKey].questions) {
             state.subjectAnswers[q.id + '_skipped'] = true;
         }
-        if (!state.skippedSubjects.includes(subjKey)) {
-            state.skippedSubjects.push(subjKey);
-        }
-
+        if (!state.skippedSubjects.includes(subjKey)) state.skippedSubjects.push(subjKey);
         state.subjectIndex++;
         state.questionIndex = 0;
-
-        if (state.subjectIndex >= state.subjectKeys.length) {
-            showSubmitSection();
-            return;
-        }
-
+        if (state.subjectIndex >= state.subjectKeys.length) { showSubmitSection(); return; }
         renderSubjectQuestion();
     };
 
-    // ==========================================
-    // إظهار قسم الإرسال
-    // ==========================================
     function showSubmitSection() {
         document.getElementById('aptitudeSection').style.display = 'none';
         document.getElementById('subjectSection').style.display = 'none';
@@ -640,14 +561,10 @@
         document.getElementById('submitSection').style.display = 'block';
     }
 
-    // ==========================================
-    // إرسال النتائج → تحليل + توصيات
-    // ==========================================
     window.submitAssessment = async function () {
         const submitBtn = document.getElementById('submitBtn');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
-
         const cleanAptitudeAnswers = {};
         for (const [k, v] of Object.entries(state.aptitudeAnswers)) {
             if (!k.endsWith('_skipped')) cleanAptitudeAnswers[k] = v;
@@ -656,7 +573,6 @@
         for (const [k, v] of Object.entries(state.subjectAnswers)) {
             if (!k.endsWith('_skipped')) cleanSubjectAnswers[k] = v;
         }
-
         try {
             const response = await fetch('{{ url_for("student.submit_assessment") }}', {
                 method: 'POST',
@@ -666,7 +582,6 @@
                     subject_answers: cleanSubjectAnswers
                 })
             });
-
             const data = await response.json();
             if (data.success) {
                 showToast('✅ تم الحفظ، جاري التحليل...', 'success');
@@ -685,9 +600,6 @@
         }
     };
 
-    // ==========================================
-    // بدء الاختبار
-    // ==========================================
     renderAptitudeQuestion();
 })();
 </script>

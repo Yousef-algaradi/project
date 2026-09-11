@@ -1,4 +1,4 @@
-د<!-- templates/dashboard.html -->
+<!-- templates/dashboard.html -->
 {% extends "base.html" %}
 
 {% block title %}لوحة التحكم - المستشار الأكاديمي{% endblock %}
@@ -58,6 +58,20 @@
             </div>
         </div>
 
+        <!-- جسر الانتقال لمسار الجامعة -->
+        {% if recommendations %}
+        <div class="university-bridge-section">
+            <div class="bridge-icon">🎓</div>
+            <h2>هل أنت مستعد للمرحلة الجامعية؟</h2>
+            <p>
+                الآن بعد أن اكتشفت تخصصك المناسب، ابدأ رحلتك لتعلم المسارات المهنية من الصفر إلى الاحتراف.
+            </p>
+            <a href="{{ url_for('university.setup') }}" class="btn-bridge">
+                <i class="fas fa-graduation-cap"></i> انتقل لمسار الجامعة
+            </a>
+        </div>
+        {% endif %}
+
         <div style="margin-top: 40px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
             <a href="{{ url_for('student.analyze') }}" class="btn btn-primary" style="padding: 20px 56px; font-size: 1.3rem; font-weight: 700;">
                 <i class="fas fa-sync-alt"></i> إعادة التحليل
@@ -93,7 +107,7 @@
 
                     <div class="major-card-body">
                         <div class="match-bar-container">
-                            <div class="match-bar" style="width: {{ rec.match_percentage }}%;"></div>
+                            <div class="match-bar" data-width="{{ rec.match_percentage }}"></div>
                         </div>
 
                         <div class="reason-box">
@@ -198,7 +212,7 @@
 
                     <div class="major-card-body">
                         <div class="match-bar-container">
-                            <div class="match-bar" style="width: {{ rec.match_percentage }}%;"></div>
+                            <div class="match-bar" data-width="{{ rec.match_percentage }}"></div>
                         </div>
 
                         <div class="reason-box">
@@ -326,6 +340,7 @@
     }
     .match-bar {
         height: 100%;
+        width: 0%;
         background-color: var(--accent);
         border-radius: 20px;
         transition: width 0.8s ease;
@@ -381,9 +396,7 @@
         background: #b91c1c;
     }
 
-    /* ==========================================
-       تكبير الداش بورد
-       ========================================== */
+    /* تكبير الداش بورد */
     #tab-dashboard .dashboard-hero {
         padding: 50px 56px;
     }
@@ -411,9 +424,7 @@
         margin-top: 6px;
     }
 
-    /* ==========================================
-       تكبير التبويبات
-       ========================================== */
+    /* تكبير التبويبات */
     .tab-bar-horizontal {
         padding: 10px;
         margin-bottom: 32px;
@@ -424,15 +435,70 @@
         font-weight: 600;
         gap: 8px;
     }
-    .tab-item i {
-        font-size: 1.6rem;
+    .tab-item i { font-size: 1.6rem; }
+    .tab-item span { font-size: 1.05rem; }
+    .tab-item .tab-indicator { width: 50px; height: 4px; }
+
+    /* ==========================================
+       جسر الانتقال إلى الجامعة
+       ========================================== */
+    .university-bridge-section {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border-radius: var(--radius-lg);
+        padding: 48px 40px;
+        text-align: center;
+        margin: 40px 0;
+        box-shadow: var(--shadow-lg);
     }
-    .tab-item span {
-        font-size: 1.05rem;
+    .bridge-icon {
+        font-size: 4rem;
+        margin-bottom: 16px;
     }
-    .tab-item .tab-indicator {
-        width: 50px;
-        height: 4px;
+    .university-bridge-section h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #ffffff !important;
+    }
+    .university-bridge-section p {
+        font-size: 1.15rem;
+        line-height: 1.7;
+        max-width: 600px;
+        margin: 0 auto 28px;
+        color: #ffffff !important;
+        opacity: 0.95;
+    }
+
+    /* زر الجسر - بـ !important لضمان ظهور النص */
+    .btn-bridge {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background-color: #ffffff !important;
+        color: #059669 !important;
+        padding: 18px 48px !important;
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-radius: 12px !important;
+        text-decoration: none !important;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        line-height: 1 !important;
+    }
+    .btn-bridge i {
+        color: #059669 !important;
+        font-size: 1.25rem !important;
+    }
+    .btn-bridge:hover {
+        background-color: #f0fdf4 !important;
+        color: #047857 !important;
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    }
+    .btn-bridge:hover i {
+        color: #047857 !important;
     }
 </style>
 
@@ -465,10 +531,18 @@
     }
 
     function confirmReset() {
-        if (confirm('⚠️ هل أنت متأكد من البدء من جديد؟\n\nسيتم حذف:\n- بيانات الثانوية\n- نتائج اختبار الميول\n- التوصيات الحالية\n\nلا يمكن التراجع!')) {
+    showGlobalConfirm({
+        icon: '⚠️',
+        title: 'هل أنت متأكد من البدء من جديد؟',
+        message: 'سيتم حذف:\n• بيانات الثانوية\n• نتائج اختبار الميول\n• التوصيات الحالية\n\nلا يمكن التراجع!',
+        confirmText: 'موافق',
+        cancelText: 'إلغاء الأمر',
+        danger: true,
+        onConfirm: function() {
             window.location.href = '{{ url_for("student.reset_all") }}';
         }
-    }
+    });
+}
 
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -476,6 +550,16 @@
         if (requestedTab === 'recommendations') {
             switchTab('recommendations');
         }
+
+        // تحريك شرائط النسبة
+        document.querySelectorAll('.match-bar').forEach(function(bar) {
+            const width = bar.getAttribute('data-width');
+            if (width) {
+                setTimeout(function() {
+                    bar.style.width = width + '%';
+                }, 100);
+            }
+        });
     });
 </script>
 {% endblock %}

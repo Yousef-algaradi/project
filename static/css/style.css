@@ -221,7 +221,7 @@ a:hover {
     font-weight: 600;
     cursor: pointer;
     background-color: var(--accent);
-    color: #ffffff !important;   /* ✅ فرض اللون الأبيض */
+    color: #ffffff !important;
     text-decoration: none;
     display: inline-block;
     font-size: 1rem;
@@ -231,7 +231,7 @@ a:hover {
 
 .btn:hover {
     background-color: var(--accent-hover);
-    color: #ffffff !important;   /* ✅ إبقاء النص أبيض عند hover */
+    color: #ffffff !important;
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
@@ -590,7 +590,7 @@ label {
 }
 
 /* ==========================================
-   Career Grid - بطاقات أفقية واسعة
+   Career Grid
    ========================================== */
 .career-table-section h4 {
     margin-bottom: 20px;
@@ -653,47 +653,47 @@ label {
 }
 
 /* ==========================================
-   Career Details Grid - تعديلات لتكبير العناصر
+   Career Details Grid
    ========================================== */
 .career-details-grid {
     display: grid;
-    grid-template-columns: 1fr; /* عمود واحد لكل عنصر */
+    grid-template-columns: 1fr;
     gap: 16px;
 }
 .detail-item {
     display: flex;
     gap: 15px;
     align-items: flex-start;
-    padding: 16px 20px; /* زيادة padding */
+    padding: 16px 20px;
     background: var(--bg-elevated);
     border-radius: 12px;
     border: 1px solid var(--border-color);
 }
 .detail-item .detail-icon {
-    font-size: 1.5rem; /* أيقونة أكبر */
+    font-size: 1.5rem;
     margin-top: 2px;
     color: var(--accent);
 }
 .detail-item div {
     display: flex;
     flex-direction: column;
-    gap: 6px; /* زيادة المسافة بين النص */
+    gap: 6px;
 }
 .detail-item strong {
-    font-size: 0.9rem; /* زيادة حجم العنوان */
+    font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-secondary);
     font-weight: 700;
 }
 .detail-item span {
-    font-size: 1.1rem; /* زيادة حجم القيمة */
+    font-size: 1.1rem;
     line-height: 1.5;
     font-weight: 500;
     color: var(--text-primary);
 }
 .detail-item.full-width {
-    grid-column: 1 / -1; /* لا يزال يعمل مع عمود واحد */
+    grid-column: 1 / -1;
 }
 
 /* ==========================================
@@ -758,38 +758,91 @@ label {
 }
 
 /* ==========================================
-   Dropdowns
+   Dropdowns (Account Menu) - النسخة النهائية
    ========================================== */
 .account-menu {
     position: relative;
     display: inline-block;
 }
+
 .dropdown-content {
     display: none;
     position: absolute;
-    inset-inline-start: 0;
-    background-color: var(--bg-secondary);
-    min-width: 200px;
+    top: calc(100% + 8px);
+    right: 0 !important;
+    left: auto !important;
+    background-color: var(--bg-card);
+    min-width: 240px;
+    max-width: 280px;
     box-shadow: var(--shadow-lg);
     border-radius: var(--radius);
-    padding: 8px 0;
-    z-index: 100;
+    padding: 8px;
+    z-index: 9999;
     border: 1px solid var(--border-color);
+    overflow: hidden;
+    animation: dropdownFadeIn 0.15s ease;
 }
+
+@keyframes dropdownFadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .dropdown-content a {
     color: var(--text-primary);
-    padding: 12px 20px;
+    padding: 12px 16px;
     text-decoration: none;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     font-size: 0.95rem;
+    border-radius: 8px;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
 }
-.dropdown-content a:hover { background-color: var(--surface-hover); }
+
+.dropdown-content a:hover {
+    background-color: var(--surface-hover);
+    color: var(--accent);
+}
+
+.dropdown-content a i {
+    width: 20px;
+    text-align: center;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.dropdown-content a.logout-link {
+    color: #dc2626;
+}
+.dropdown-content a.logout-link i {
+    color: #dc2626;
+}
+.dropdown-content a.logout-link:hover {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
 .dropdown-content .divider {
     height: 1px;
     background: var(--border-color);
-    margin: 8px 0;
+    margin: 6px 8px;
 }
+
 .show { display: block; }
+
+/* على الجوال */
+@media (max-width: 600px) {
+    .dropdown-content {
+        position: fixed;
+        top: 90px;
+        right: 16px !important;
+        left: 16px !important;
+        max-width: none;
+        width: auto;
+    }
+}
 
 /* ==========================================
    Help Panel
@@ -845,13 +898,12 @@ label {
     .major-title-section { gap: 12px; }
     .major-title-section h2 { font-size: 1.5rem; }
     .major-card-body { padding: 16px; }
-    .career-details-grid { grid-template-columns: 1fr; } /* عمود واحد على الموبايل */
+    .career-details-grid { grid-template-columns: 1fr; }
     .detail-item.full-width { grid-column: auto; }
     .tab-item { padding: 8px 10px; }
     .tab-item i { font-size: 1.2rem; }
     .tab-item span { font-size: 0.75rem; }
 
-    /* Career cards تصبح عمودية على الشاشات الصغيرة */
     .career-card {
         flex-direction: column;
     }
@@ -873,18 +925,17 @@ label {
     .career-grid { gap: 15px; }
     .help-panel { width: 100%; }
 }
+
 /* ==========================================
-   إصلاح ظهور الأزرار في الوضع الداكن
+   إصلاح الوضع الداكن
    ========================================== */
 [data-theme="dark"] .icon-btn {
     color: var(--text-primary);
     background: transparent;
 }
-
 [data-theme="dark"] .icon-btn i {
     color: var(--text-primary);
 }
-
 [data-theme="dark"] .icon-btn:hover {
     background: var(--surface-hover);
     color: var(--text-primary);
@@ -895,18 +946,15 @@ label {
     border-color: var(--border-color);
     background: transparent;
 }
-
 [data-theme="dark"] .btn-outline:hover {
     background: var(--surface-hover);
     color: var(--text-primary);
 }
 
-/* أزرار تسجيل الدخول وإنشاء حساب */
 [data-theme="dark"] .btn-login {
     background: var(--accent);
     color: #ffffff;
 }
-
 [data-theme="dark"] .btn-login:hover {
     background: var(--accent-hover);
 }
@@ -916,23 +964,103 @@ label {
     color: var(--text-primary);
     border: 1px solid var(--accent);
 }
-
 [data-theme="dark"] .btn-register:hover {
     background: var(--accent-light);
     color: var(--text-primary);
 }
-/* إصلاح ظهور رسائل التوست في الوضع الداكن */
+
 [data-theme="dark"] .toast {
     background: var(--bg-secondary);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-lg);
 }
-
 [data-theme="dark"] .toast button {
     color: var(--text-muted);
 }
-
 [data-theme="dark"] .toast button:hover {
     color: var(--text-primary);
+}
+
+[data-theme="dark"] .dropdown-content {
+    background-color: var(--bg-card);
+    border-color: var(--border-color);
+}
+
+/* ==========================================
+   Misc Buttons
+   ========================================== */
+.btn-switch-warning {
+    border-color: var(--warning) !important;
+    color: var(--warning) !important;
+}
+.btn-switch-warning:hover {
+    background: var(--warning) !important;
+    color: white !important;
+}
+.top-action-bar {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.back-to-dash {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: all 0.2s ease;
+    margin-bottom: 16px;
+}
+.back-to-dash:hover {
+    background: var(--accent);
+    color: white;
+    transform: translateX(-4px);
+}
+.assessment-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding: 0 4px;
+}
+.assessment-actions .btn {
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+.btn-save-analyze {
+    background: #10b981;
+    color: white;
+    border-color: #10b981;
+}
+.btn-save-analyze:hover {
+    background: #059669;
+    border-color: #059669;
+}
+.btn-skip {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+}
+.btn-skip:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
 }

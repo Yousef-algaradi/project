@@ -1,0 +1,311 @@
+<!-- templates/university/quiz_result.html -->
+{% extends "base.html" %}
+
+{% block title %}نتيجة الاختبار - {{ stage.title }}{% endblock %}
+
+{% block help_title %}نتيجة الاختبار{% endblock %}
+{% block help_content %}شاهد نتيجتك وتقدمك في المسار.{% endblock %}
+{% block help_step %}{% if result.passed %}انتقل للمرحلة التالية!{% else %}راجع المحتوى وأعد المحاولة.{% endif %}{% endblock %}
+
+{% block content %}
+<div class="uni-result-container">
+
+    <!-- بطاقة النتيجة -->
+    <div class="result-card {% if result.passed %}passed{% else %}failed{% endif %}">
+        <div class="result-icon">
+            {% if result.passed %}🎉{% else %}😔{% endif %}
+        </div>
+        <h1>
+            {% if result.passed %}مبروك! نجحت{% else %}لم تنجح هذه المرة{% endif %}
+        </h1>
+        <p class="result-subtitle">
+            {% if result.passed %}
+            أكملت المرحلة {{ stage.stage_number }} بنجاح!
+            {% else %}
+            تحتاج 7 إجابات صحيحة على الأقل للنجاح.
+            {% endif %}
+        </p>
+
+        <!-- النسبة -->
+        <div class="score-circle {% if result.passed %}circle-passed{% else %}circle-failed{% endif %}">
+            <div class="score-number">{{ result.score }}/{{ result.total }}</div>
+            <div class="score-percentage">{{ ((result.score / result.total) * 100) | round }}%</div>
+        </div>
+
+        <!-- XP المحصل -->
+        {% if result.passed %}
+        <div class="xp-earned">
+            <i class="fas fa-star"></i>
+            <span>+ XP مكتسب</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- إحصائيات المسار المحدثة -->
+    <section class="updated-stats-section">
+        <h2 class="section-title">📊 تقدمك في المسار</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-icon">✅</div>
+                <div class="stat-num">{{ status.completed_count }}</div>
+                <div class="stat-lbl">مراحل مكتملة</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon">📚</div>
+                <div class="stat-num">{{ status.total_stages }}</div>
+                <div class="stat-lbl">إجمالي المراحل</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-num">{{ status.progress.total_xp }}</div>
+                <div class="stat-lbl">XP الكلي</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-icon">🔥</div>
+                <div class="stat-num">{{ status.progress.streak_days }}</div>
+                <div class="stat-lbl">Streak</div>
+            </div>
+        </div>
+
+        <!-- شريط التقدم -->
+        <div class="progress-wrapper">
+            <div class="progress-bar">
+                <div class="progress-fill" data-width="{{ status.percentage }}"></div>
+            </div>
+            <div class="progress-text">{{ status.percentage }}% مكتمل</div>
+        </div>
+    </section>
+
+    <!-- الأزرار -->
+    <div class="result-actions">
+        {% if result.passed %}
+            {% if status.progress.is_completed %}
+            <div class="congrats-box">
+                🏆 لقد أكملت المسار بالكامل! مبروك!
+            </div>
+            <a href="{{ url_for('university.dashboard') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-trophy"></i> عرض الإنجازات
+            </a>
+            {% else %}
+            <a href="{{ url_for('university.career_path', path_slug=career_path.slug) }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-arrow-left"></i> انتقل للمرحلة التالية
+            </a>
+            {% endif %}
+        {% else %}
+            <a href="{{ url_for('university.stage_detail', stage_id=stage.id) }}" class="btn btn-outline">
+                <i class="fas fa-book"></i> راجع المحتوى
+            </a>
+            <a href="{{ url_for('university.quiz', stage_id=stage.id) }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-redo"></i> أعد الاختبار
+            </a>
+        {% endif %}
+    </div>
+
+    <div style="text-align: center; margin-top: 24px;">
+        <a href="{{ url_for('university.career_path', path_slug=career_path.slug) }}" class="btn btn-outline">
+            <i class="fas fa-arrow-right"></i> العودة للمسار
+        </a>
+    </div>
+
+</div>
+
+<style>
+    .uni-result-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* بطاقة النتيجة */
+    .result-card {
+        text-align: center;
+        background: var(--bg-card);
+        border: 3px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 48px 32px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-md);
+    }
+    .result-card.passed {
+        border-color: var(--accent);
+        background: var(--accent-light);
+    }
+    .result-card.failed {
+        border-color: var(--danger);
+        background: #fef2f2;
+    }
+    [data-theme="dark"] .result-card.failed {
+        background: #450a0a;
+    }
+    .result-icon {
+        font-size: 5rem;
+        margin-bottom: 16px;
+        animation: bounceIn 0.6s ease;
+    }
+    @keyframes bounceIn {
+        0% { transform: scale(0); }
+        60% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+    .result-card h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .result-subtitle {
+        font-size: 1.15rem;
+        color: var(--text-secondary);
+        margin-bottom: 32px;
+    }
+
+    /* دائرة النتيجة */
+    .score-circle {
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        margin: 0 auto 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border: 8px solid;
+        background: var(--bg-card);
+    }
+    .circle-passed {
+        border-color: var(--accent);
+    }
+    .circle-failed {
+        border-color: var(--danger);
+    }
+    .score-number {
+        font-size: 2.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1;
+    }
+    .score-percentage {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        margin-top: 8px;
+        font-weight: 600;
+    }
+
+    .xp-earned {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--accent);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 24px;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    /* قسم الإحصائيات */
+    .updated-stats-section {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        margin-bottom: 32px;
+    }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+    .stat-box {
+        text-align: center;
+        padding: 20px;
+        background: var(--bg-elevated);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+    }
+    .stat-icon {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+    }
+    .stat-num {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--accent);
+        line-height: 1;
+    }
+    .stat-lbl {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 6px;
+    }
+
+    .progress-wrapper {
+        margin-top: 16px;
+    }
+    .progress-bar {
+        background: var(--bg-elevated);
+        border-radius: 20px;
+        height: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        margin-bottom: 8px;
+    }
+    .progress-fill {
+        height: 100%;
+        width: 0%;
+        background-color: var(--accent);
+        border-radius: 20px;
+        transition: width 0.8s ease;
+    }
+    .progress-text {
+        text-align: center;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    /* الأزرار */
+    .result-actions {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+    }
+    .btn-lg {
+        padding: 16px 40px;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+    .congrats-box {
+        width: 100%;
+        text-align: center;
+        padding: 20px;
+        background: var(--accent);
+        color: white;
+        border-radius: var(--radius-lg);
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.progress-fill').forEach(function(bar) {
+            const width = bar.getAttribute('data-width');
+            if (width) {
+                setTimeout(function() {
+                    bar.style.width = width + '%';
+                }, 100);
+            }
+        });
+    });
+</script>
+{% endblock %}

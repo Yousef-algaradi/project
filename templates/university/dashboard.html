@@ -1,0 +1,431 @@
+<!-- templates/university/dashboard.html -->
+{% extends "university/base_university.html" %}
+
+{% block title %}Dashboard - المستشار الأكاديمي{% endblock %}
+
+{% block help_title %}Dashboard{% endblock %}
+{% block help_content %}تابع تقدمك في المسار المهني، XP، والـ Streak.{% endblock %}
+{% block help_step %}اختر مساراً من التبويبات لمتابعة التعلم.{% endblock %}
+
+{% block university_content %}
+
+<!-- Tabs الفرعية (المسارات) -->
+{% if progress_list %}
+<div class="track-tabs">
+    {% for p in progress_list %}
+    <a href="{{ url_for('university.dashboard', track=p.career_path.slug) }}" 
+       class="track-tab {% if current_slug == p.career_path.slug %}active{% endif %}">
+        <span class="track-tab-icon">{{ p.career_path.icon }}</span>
+        <span class="track-tab-name">{{ p.career_path.title }}</span>
+        {% if p.is_completed %}
+        <i class="fas fa-check-circle" style="color: var(--accent);"></i>
+        {% endif %}
+    </a>
+    {% endfor %}
+    
+    <a href="{{ url_for('university.setup') }}" class="track-tab track-tab-add">
+        <i class="fas fa-plus"></i>
+        <span>New Track</span>
+    </a>
+</div>
+{% endif %}
+
+<!-- محتوى Dashboard -->
+{% if current_path_status %}
+
+<!-- Hero -->
+<header class="dashboard-hero">
+    <div class="hero-text">
+        <h1>👋 مرحباً {{ user.name }}</h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">
+            🎓 طالب جامعي | المسار الحالي: <strong>{{ current_path_status.career_path.title }}</strong>
+        </p>
+    </div>
+    <div class="hero-stats">
+        <div class="stat-card">
+            <span class="stat-number">{{ total_xp }}</span>
+            <span class="stat-label">XP</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">🔥 {{ current_streak }}</span>
+            <span class="stat-label">Streak</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{{ active_paths }}</span>
+            <span class="stat-label">مسارات نشطة</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-number">{{ completed_paths }}</span>
+            <span class="stat-label">مسارات مكتملة</span>
+        </div>
+    </div>
+</header>
+
+<!-- المسار الحالي -->
+<section style="margin-bottom: 40px;">
+    <h2 style="font-size: 1.6rem; margin-bottom: 20px;">📌 المسار الحالي</h2>
+    <div class="current-path-card">
+        <!-- ✅ زر X لحذف المسار -->
+        <button type="button" 
+                class="track-delete-btn"
+                aria-label="حذف المسار"
+                title="حذف المسار من لوحتي"
+                onclick="deletePath(event, '{{ current_path_status.career_path.slug }}', '{{ current_path_status.career_path.title }}')">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="cp-header">
+            <div class="cp-title">
+                <span class="cp-icon">{{ current_path_status.career_path.icon }}</span>
+                <div>
+                    <div class="cp-major-label">{{ current_path_status.career_path.major_key }}</div>
+                    <h3>{{ current_path_status.career_path.title }}</h3>
+                </div>
+            </div>
+            <div class="cp-percentage">{{ current_path_status.percentage }}%</div>
+        </div>
+        
+        <div class="cp-progress-bar">
+            <div class="cp-progress-fill" data-width="{{ current_path_status.percentage }}"></div>
+        </div>
+        
+        <div class="cp-meta">
+            <span>✅ {{ current_path_status.completed_count }} من {{ current_path_status.total_stages }} مراحل</span>
+            <span>🎯 XP: {{ current_path_status.progress.total_xp }}</span>
+        </div>
+
+        <a href="{{ url_for('university.career_path', path_slug=current_path_status.career_path.slug) }}" 
+           class="btn btn-primary">
+            <i class="fas fa-play"></i> متابعة التعلم
+        </a>
+    </div>
+</section>
+
+<!-- قائمة كل المسارات -->
+<section>
+    <h2 style="font-size: 1.6rem; margin-bottom: 20px;">🎯 جميع مساراتك</h2>
+    <div class="paths-grid">
+        {% for p in progress_list %}
+        <div class="path-mini-card {% if p.is_completed %}completed{% endif %}">
+            <!-- ✅ زر X للحذف -->
+            <button type="button" 
+                    class="track-delete-btn"
+                    aria-label="حذف المسار"
+                    title="حذف المسار"
+                    onclick="deletePath(event, '{{ p.career_path.slug }}', '{{ p.career_path.title }}')">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="path-mini-header">
+                <span class="path-mini-icon">{{ p.career_path.icon }}</span>
+                <div>
+                    <div class="path-mini-title">{{ p.career_path.title }}</div>
+                    <div class="path-mini-xp">XP: {{ p.total_xp }}</div>
+                </div>
+            </div>
+            <div class="path-mini-progress">
+                <div class="path-mini-bar" data-width="{{ p.get_progress_percentage() }}"></div>
+            </div>
+            <div class="path-mini-footer">
+                <span>{{ p.get_progress_percentage() }}%</span>
+                {% if p.is_completed %}
+                <span class="completed-badge">✅ مكتمل</span>
+                {% else %}
+                <span>المرحلة {{ p.current_stage }}</span>
+                {% endif %}
+            </div>
+            <a href="{{ url_for('university.career_path', path_slug=p.career_path.slug) }}" 
+               class="btn btn-outline btn-sm">
+                {% if p.is_completed %}👁️ عرض{% else %}▶️ متابعة{% endif %}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+{% else %}
+
+<!-- Empty state: لا يوجد مسار -->
+<div class="empty-state">
+    <i class="fas fa-road" style="font-size: 4rem; color: var(--accent);"></i>
+    <h2>لم تختر أي مسار بعد</h2>
+    <p>اذهب إلى صفحة Home لاختيار تخصصك ومسارك وابدأ رحلتك.</p>
+    <a href="{{ url_for('university.setup') }}" class="btn btn-primary btn-lg">
+        <i class="fas fa-home"></i> الذهاب إلى Home
+    </a>
+</div>
+
+{% endif %}
+
+<style>
+    /* Tabs الفرعية */
+    .track-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        padding: 8px;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+    .track-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        border-radius: var(--radius);
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 1rem;
+        white-space: nowrap;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+    }
+    .track-tab:hover {
+        background: var(--bg-card);
+        color: var(--text-primary);
+    }
+    .track-tab.active {
+        background: var(--accent-light);
+        color: var(--accent);
+        border-color: var(--accent);
+    }
+    .track-tab-icon { font-size: 1.2rem; }
+    .track-tab-add {
+        color: var(--accent);
+        border: 2px dashed var(--accent);
+        margin-inline-start: auto;
+    }
+    .track-tab-add:hover {
+        background: var(--accent-light);
+    }
+
+    /* المسار الحالي */
+    .current-path-card {
+        position: relative;
+        background: var(--bg-card);
+        border: 2px solid var(--accent);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+    }
+    .cp-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    .cp-title { display: flex; align-items: center; gap: 16px; }
+    .cp-icon { font-size: 2.5rem; }
+    .cp-major-label {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+    }
+    .cp-title h3 { font-size: 1.8rem; margin: 0; font-weight: 700; }
+    .cp-percentage { font-size: 2rem; font-weight: 700; color: var(--accent); }
+    .cp-progress-bar {
+        background: var(--bg-elevated);
+        border-radius: 20px;
+        height: 16px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        border: 1px solid var(--border-color);
+    }
+    .cp-progress-fill {
+        height: 100%;
+        width: 0%;
+        background-color: var(--accent);
+        border-radius: 20px;
+        transition: width 0.8s ease;
+    }
+    .cp-meta {
+        display: flex;
+        justify-content: space-between;
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 1rem;
+    }
+
+    /* شبكة المسارات */
+    .paths-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    .path-mini-card {
+        position: relative;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        transition: all var(--transition);
+    }
+    .path-mini-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--accent);
+    }
+    .path-mini-card.completed {
+        border-color: var(--accent);
+        background: var(--accent-light);
+    }
+    .path-mini-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    .path-mini-icon { font-size: 2rem; }
+    .path-mini-title { font-size: 1.1rem; font-weight: 600; }
+    .path-mini-xp { font-size: 0.85rem; color: var(--text-secondary); }
+    .path-mini-progress {
+        background: var(--bg-elevated);
+        border-radius: 20px;
+        height: 10px;
+        overflow: hidden;
+        margin-bottom: 12px;
+        border: 1px solid var(--border-color);
+    }
+    .path-mini-bar {
+        height: 100%;
+        width: 0%;
+        background-color: var(--accent);
+        border-radius: 20px;
+        transition: width 0.8s ease;
+    }
+    .path-mini-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+    .completed-badge { color: var(--accent); font-weight: 600; }
+    .btn-sm { padding: 10px 20px; font-size: 0.95rem; width: 100%; text-align: center; }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-color);
+    }
+    .empty-state h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 20px 0 12px;
+    }
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 1.15rem;
+        margin-bottom: 28px;
+    }
+
+    /* زر X لحذف المسار */
+    .track-delete-btn {
+        position: absolute;
+        top: 12px;
+        inset-inline-end: 12px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        z-index: 10;
+        font-size: 0.9rem;
+        padding: 0;
+    }
+    .track-delete-btn:hover {
+        background: var(--danger, #dc2626);
+        color: white;
+        border-color: var(--danger, #dc2626);
+        transform: scale(1.1);
+    }
+    .track-delete-btn:focus-visible {
+        outline: 2px solid var(--danger, #dc2626);
+        outline-offset: 2px;
+    }
+
+    /* على الجوال */
+    @media (max-width: 600px) {
+        .track-delete-btn {
+            width: 28px;
+            height: 28px;
+            top: 8px;
+            inset-inline-end: 8px;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.cp-progress-fill, .path-mini-bar').forEach(function(bar) {
+            const width = bar.getAttribute('data-width');
+            if (width) {
+                setTimeout(function() {
+                    bar.style.width = width + '%';
+                }, 100);
+            }
+        });
+    });
+
+    // ==========================================
+    // حذف المسار
+    // ==========================================
+    window.deletePath = function(event, slug, title) {
+        if (event) event.preventDefault();
+        
+        if (typeof showConfirmModal === 'function') {
+            showConfirmModal({
+                icon: '🗑️',
+                title: 'حذف المسار',
+                message: 'هل أنت متأكد من حذف مسار "' + title + '"؟\nسيتم حذف تقدمك و XP في هذا المسار فقط.',
+                confirmText: 'نعم، احذف المسار',
+                cancelText: 'إلغاء الأمر',
+                danger: true,
+                onConfirm: function() {
+                    var form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/university/career/' + slug + '/delete';
+                    
+                    var csrfInput = document.querySelector('input[name="csrf_token"]');
+                    if (csrfInput) {
+                        var csrfClone = document.createElement('input');
+                        csrfClone.type = 'hidden';
+                        csrfClone.name = 'csrf_token';
+                        csrfClone.value = csrfInput.value;
+                        form.appendChild(csrfClone);
+                    }
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        } else {
+            if (window.confirm('هل أنت متأكد من حذف مسار "' + title + '"؟')) {
+                window.location.href = '/university/career/' + slug + '/delete';
+            }
+        }
+        return false;
+    };
+</script>
+{% endblock %}
