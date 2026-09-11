@@ -1,11 +1,11 @@
-<!-- templates/dashboard.html -->
+د<!-- templates/dashboard.html -->
 {% extends "base.html" %}
 
 {% block title %}لوحة التحكم - المستشار الأكاديمي{% endblock %}
 
 {% block help_title %}لوحة التحكم المتقدمة{% endblock %}
-{% block help_content %}هنا تعرض أفضل 3 تخصصات مناسبة لك مع مخططات التوافق.{% endblock %}
-{% block help_step %}اختر التبويب المناسب، وانقر على أي تخصص لاستعراض تفاصيله الكاملة.{% endblock %}
+{% block help_content %}هنا تعرض أفضل 3 تخصصات مناسبة لك مع المسارات المهنية.{% endblock %}
+{% block help_step %}انقر على أي تخصص لاستعراض تفاصيله الكاملة.{% endblock %}
 
 {% block content %}
 <div class="tab-bar-horizontal">
@@ -55,27 +55,16 @@
                     </span>
                     <span class="stat-label">أفضل توافق</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number">
-                        {% set total_jobs = 0 %}
-                        {% for rec in recommendations[:3] %}
-                            {% set career_paths = rec.career_paths_list %}
-                            {% set total_jobs = total_jobs + career_paths|length %}
-                        {% endfor %}
-                        {{ total_jobs }}
-                    </span>
-                    <span class="stat-label">وظائف مستقبلية</span>
-                </div>
             </div>
         </div>
 
-        <div style="margin-top: 30px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
-            <a href="{{ url_for('student.profile') }}" class="btn btn-outline" style="padding: 14px 32px; font-size: 1.1rem;">
-                <i class="fas fa-edit"></i> تعديل بيانات الثانوية
-            </a>
-            <a href="{{ url_for('student.analyze') }}" class="btn" style="padding: 14px 32px; font-size: 1.1rem;">
+        <div style="margin-top: 40px; display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;">
+            <a href="{{ url_for('student.analyze') }}" class="btn btn-primary" style="padding: 20px 56px; font-size: 1.3rem; font-weight: 700;">
                 <i class="fas fa-sync-alt"></i> إعادة التحليل
             </a>
+            <button onclick="confirmReset()" class="btn btn-danger" style="padding: 20px 56px; font-size: 1.3rem; font-weight: 700;">
+                <i class="fas fa-redo"></i> البدء من جديد
+            </button>
         </div>
     </div>
 
@@ -86,6 +75,8 @@
             {% set top_recommendations = recommendations[:3] %}
             {% for rec in top_recommendations %}
                 {% set career_paths = rec.career_paths_list %}
+                {% set reasons = rec.reasons_list if rec.reasons_list is defined and rec.reasons_list else [] %}
+                {% set weaknesses = rec.weaknesses_list if rec.weaknesses_list is defined and rec.weaknesses_list else [] %}
                 <div class="major-card-full">
                     <div class="major-card-header" onclick="toggleMajorCard(this)">
                         <div class="major-title-section">
@@ -101,10 +92,35 @@
                     </div>
 
                     <div class="major-card-body">
-                        <div class="reason-box">
-                            <i class="fas fa-robot"></i>
-                            <p>{{ rec.reason }}</p>
+                        <div class="match-bar-container">
+                            <div class="match-bar" style="width: {{ rec.match_percentage }}%;"></div>
                         </div>
+
+                        <div class="reason-box">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4 style="margin-bottom: 12px; font-size: 1.15rem; color: var(--text-primary);">تم اختيار هذا التخصص بناءً على:</h4>
+                                <ul class="reasons-list">
+                                    {% for reason in reasons %}
+                                    <li>{{ reason }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        {% if weaknesses %}
+                        <div class="weakness-box">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <h4 style="margin-bottom: 12px; font-size: 1.15rem; color: var(--text-primary);">⚠️ نقاط تحتاج إلى تطويرها:</h4>
+                                <ul class="weakness-list">
+                                    {% for weakness in weaknesses %}
+                                    <li>{{ weakness }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
 
                         <div class="career-table-section">
                             <h4>🚀 المسارات المهنية المقترحة</h4>
@@ -147,7 +163,6 @@
                             </div>
                             {% else %}
                             <p style="color: var(--text-secondary);">📭 لا توجد مسارات مهنية متاحة لهذا التخصص حالياً.</p>
-                            <p style="color: var(--text-secondary); font-size: 0.9rem;">تأكد من إكمال اختبار الميول للحصول على توصيات أكثر دقة.</p>
                             {% endif %}
                         </div>
                     </div>
@@ -165,6 +180,8 @@
             <div id="extra-recommendations" style="display: none;">
                 {% for rec in recommendations[3:] %}
                 {% set career_paths = rec.career_paths_list %}
+                {% set reasons = rec.reasons_list if rec.reasons_list is defined and rec.reasons_list else [] %}
+                {% set weaknesses = rec.weaknesses_list if rec.weaknesses_list is defined and rec.weaknesses_list else [] %}
                 <div class="major-card-full">
                     <div class="major-card-header" onclick="toggleMajorCard(this)">
                         <div class="major-title-section">
@@ -180,10 +197,35 @@
                     </div>
 
                     <div class="major-card-body">
-                        <div class="reason-box">
-                            <i class="fas fa-robot"></i>
-                            <p>{{ rec.reason }}</p>
+                        <div class="match-bar-container">
+                            <div class="match-bar" style="width: {{ rec.match_percentage }}%;"></div>
                         </div>
+
+                        <div class="reason-box">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <h4 style="margin-bottom: 12px; font-size: 1.15rem; color: var(--text-primary);">تم اختيار هذا التخصص بناءً على:</h4>
+                                <ul class="reasons-list">
+                                    {% for reason in reasons %}
+                                    <li>{{ reason }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+
+                        {% if weaknesses %}
+                        <div class="weakness-box">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <h4 style="margin-bottom: 12px; font-size: 1.15rem; color: var(--text-primary);">⚠️ نقاط تحتاج إلى تطويرها:</h4>
+                                <ul class="weakness-list">
+                                    {% for weakness in weaknesses %}
+                                    <li>{{ weakness }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                        {% endif %}
 
                         <div class="career-table-section">
                             <h4>🚀 المسارات المهنية المقترحة</h4>
@@ -243,13 +285,162 @@
     </div>
 </div>
 
+<style>
+    .major-card-body { display: none; }
+    .major-card-full.open .major-card-body { display: block; }
+    .major-card-full.open .major-toggle i { transform: rotate(180deg); }
+    .major-card-header { transition: background var(--transition-fast); }
+    .major-card-header:hover { background: var(--surface-hover); }
+
+    .reasons-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .reasons-list li {
+        position: relative;
+        padding-inline-start: 24px;
+        margin-bottom: 10px;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--text-primary);
+    }
+    .reasons-list li::before {
+        content: "✓";
+        position: absolute;
+        inset-inline-start: 0;
+        top: 0;
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    .reasons-list li:last-child { margin-bottom: 0; }
+
+    .match-bar-container {
+        background: var(--bg-elevated);
+        border-radius: 20px;
+        height: 14px;
+        margin-bottom: 20px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+    .match-bar {
+        height: 100%;
+        background-color: var(--accent);
+        border-radius: 20px;
+        transition: width 0.8s ease;
+    }
+
+    .weakness-box {
+        display: flex;
+        gap: 16px;
+        background: #fef3c7;
+        padding: 18px 24px;
+        border-radius: var(--radius);
+        margin-bottom: 24px;
+        border-inline-start: 4px solid var(--warning);
+    }
+    [data-theme="dark"] .weakness-box {
+        background: #422006;
+    }
+    .weakness-box > i {
+        font-size: 2rem;
+        color: var(--warning);
+        flex-shrink: 0;
+    }
+    .weakness-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .weakness-list li {
+        position: relative;
+        padding-inline-start: 24px;
+        margin-bottom: 10px;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: var(--text-primary);
+    }
+    .weakness-list li::before {
+        content: "⚠";
+        position: absolute;
+        inset-inline-start: 0;
+        top: 0;
+        color: var(--warning);
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    .weakness-list li:last-child { margin-bottom: 0; }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+        border: none;
+    }
+    .btn-danger:hover {
+        background: #b91c1c;
+    }
+
+    /* ==========================================
+       تكبير الداش بورد
+       ========================================== */
+    #tab-dashboard .dashboard-hero {
+        padding: 50px 56px;
+    }
+    #tab-dashboard .hero-text h1 {
+        font-size: 3rem;
+        font-weight: 700;
+    }
+    #tab-dashboard .hero-text p {
+        font-size: 1.35rem !important;
+    }
+    #tab-dashboard .hero-stats {
+        gap: 28px;
+    }
+    #tab-dashboard .stat-card {
+        padding: 26px 40px;
+        min-width: 160px;
+        border-radius: var(--radius-lg);
+    }
+    #tab-dashboard .stat-number {
+        font-size: 2.8rem;
+        font-weight: 700;
+    }
+    #tab-dashboard .stat-label {
+        font-size: 1.1rem;
+        margin-top: 6px;
+    }
+
+    /* ==========================================
+       تكبير التبويبات
+       ========================================== */
+    .tab-bar-horizontal {
+        padding: 10px;
+        margin-bottom: 32px;
+    }
+    .tab-item {
+        padding: 18px 24px;
+        font-size: 1.15rem;
+        font-weight: 600;
+        gap: 8px;
+    }
+    .tab-item i {
+        font-size: 1.6rem;
+    }
+    .tab-item span {
+        font-size: 1.05rem;
+    }
+    .tab-item .tab-indicator {
+        width: 50px;
+        height: 4px;
+    }
+</style>
+
 <script>
     function switchTab(tabId) {
-        // إخفاء جميع التبويبات
         document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
 
-        // تفعيل التبويب المطلوب
         const activeTab = document.querySelector(`.tab-item[data-tab="${tabId}"]`);
         const activePane = document.getElementById(`tab-${tabId}`);
         if (activeTab && activePane) {
@@ -261,37 +452,29 @@
     function toggleMajorCard(headerElement) {
         const card = headerElement.closest('.major-card-full');
         if (!card) return;
-        const body = card.querySelector('.major-card-body');
-        const icon = card.querySelector('.major-toggle i');
-        if (!body) return;
-
-        if (body.style.display === 'none' || body.style.display === '') {
-            body.style.display = 'block';
-            if (icon) icon.style.transform = 'rotate(180deg)';
-        } else {
-            body.style.display = 'none';
-            if (icon) icon.style.transform = 'rotate(0deg)';
-        }
+        card.classList.toggle('open');
     }
 
     function showAllRecommendations() {
         const extra = document.getElementById('extra-recommendations');
         if (extra) {
             extra.style.display = 'block';
-            // إخفاء رابط "عرض الكل"
             const container = extra.previousElementSibling;
             if (container) container.style.display = 'none';
         }
     }
 
+    function confirmReset() {
+        if (confirm('⚠️ هل أنت متأكد من البدء من جديد؟\n\nسيتم حذف:\n- بيانات الثانوية\n- نتائج اختبار الميول\n- التوصيات الحالية\n\nلا يمكن التراجع!')) {
+            window.location.href = '{{ url_for("student.reset_all") }}';
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // فتح أول بطاقة تلقائياً
-        const firstCard = document.querySelector('.major-card-full');
-        if (firstCard) {
-            const header = firstCard.querySelector('.major-card-header');
-            if (header) {
-                toggleMajorCard(header);
-            }
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedTab = urlParams.get('tab');
+        if (requestedTab === 'recommendations') {
+            switchTab('recommendations');
         }
     });
 </script>

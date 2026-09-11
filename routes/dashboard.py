@@ -1,8 +1,9 @@
+# routes/dashboard.py
 from flask import Blueprint, render_template, session, redirect, url_for, flash
 from utils.decorators import login_required
 from models.user import User
 from models.recommendation import Recommendation
-import json  # ✅ إضافة import لتحويل JSON
+import json
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -15,8 +16,6 @@ def home():
     # جلب جميع التوصيات مرتبة من الأحدث
     recommendations = Recommendation.query.filter_by(user_id=user_id).order_by(Recommendation.match_percentage.desc()).all()
     
-    # ✅ تحويل career_paths من JSON إلى قائمة لكل توصية
-    for rec in recommendations:
-        rec.career_paths_list = rec.get_career_paths()  # استخدام الدالة المساعدة من الموديل
+    # لا حاجة لتحويل career_paths هنا - الخاصية career_paths_list جاهزة من الموديل
     
     return render_template('dashboard.html', user=user, recommendations=recommendations)

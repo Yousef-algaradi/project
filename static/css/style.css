@@ -220,38 +220,54 @@ a:hover {
     border: none;
     font-weight: 600;
     cursor: pointer;
-    background: var(--accent);
-    color: white;
+    background-color: var(--accent);
+    color: #ffffff !important;   /* ✅ فرض اللون الأبيض */
     text-decoration: none;
     display: inline-block;
     font-size: 1rem;
     transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
     text-align: center;
 }
+
 .btn:hover {
-    background: var(--accent-hover);
+    background-color: var(--accent-hover);
+    color: #ffffff !important;   /* ✅ إبقاء النص أبيض عند hover */
     transform: translateY(-1px);
     box-shadow: var(--shadow-md);
 }
+
 .btn:active {
     transform: translateY(0);
 }
+
+.btn:focus-visible {
+    outline: 2px solid #ffffff;
+    outline-offset: 2px;
+}
+
+/* أزرار outline */
 .btn-outline {
     background: transparent;
     border: 1px solid var(--border-color);
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
 }
+
 .btn-outline:hover {
     background: var(--surface-hover);
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
     border-color: var(--text-muted);
     transform: translateY(-1px);
 }
+
+/* أزرار danger */
 .btn-danger {
-    background: var(--danger);
+    background-color: var(--danger);
+    color: #ffffff !important;
 }
+
 .btn-danger:hover {
-    background: #dc2626;
+    background-color: #b91c1c;
+    color: #ffffff !important;
 }
 
 /* Back button specific */

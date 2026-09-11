@@ -1,45 +1,112 @@
 <!-- templates/assessment.html -->
 {% extends "base.html" %}
 
-{% block title %}اختبار الميول المهنية - المستشار الأكاديمي{% endblock %}
+{% block title %}اختبار الميول والمواد - المستشار الأكاديمي{% endblock %}
 
-{% block help_title %}اختبار الميول المهنية{% endblock %}
-{% block help_content %}أجب عن الأسئلة التالية لمساعدتنا في فهم ميولك وقدراتك بشكل أدق.{% endblock %}
-{% block help_step %}اختر إجابة لكل سؤال أو اضغط "تخطي" للانتقال للسؤال التالي.{% endblock %}
+{% block help_title %}اختبار الميول والمواد{% endblock %}
+{% block help_content %}أجب عن أسئلة الميول والمواد لمساعدتنا في فهم قدراتك وميولك بشكل دقيق.{% endblock %}
+{% block help_step %}اختر إجابة لكل سؤال، أو اضغط "تخطي" لتخطي السؤال أو المرحلة.{% endblock %}
 
 {% block content %}
 <div class="assessment-container">
     <header class="assessment-header">
-        <h1>🧭 اختبار الميول المهنية</h1>
-        <p>أجب عن 20 سؤالًا لنساعدك في تحديد التخصص الأنسب لك.</p>
+        <h1>🧭 اختبار الميول والمواد</h1>
+        <p>أجب عن الأسئلة لنساعدك في تحديد التخصص الأنسب لك.</p>
+        <div class="branch-indicator">
+            <i class="fas fa-graduation-cap"></i>
+            القسم: <strong>{{ branch }}</strong>
+        </div>
     </header>
 
+    <!-- شريط التقدم -->
     <div class="progress-container">
         <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
     </div>
-    <div class="progress-text" id="progressText">السؤال 1 من 20</div>
+    <div class="progress-text" id="progressText">جاري التحميل...</div>
 
-    <div class="question-card" id="questionCard">
-        <h2 class="question-text" id="questionText">جاري تحميل الأسئلة...</h2>
-        <div class="options-list" id="optionsList"></div>
+    <!-- المرحلة 1: أسئلة الميول -->
+    <div id="aptitudeSection">
+        <div class="subject-card" id="aptitudeCard">
+            <div class="subject-card-header">
+                <h3 class="subject-name">
+                    <i class="fas fa-brain"></i> المرحلة 1: أسئلة الميول
+                </h3>
+                <button class="btn-skip-subject" onclick="skipAllAptitude()">
+                    <i class="fas fa-forward"></i> تخطي الميول بالكامل
+                </button>
+            </div>
+
+            <div class="subject-question-body">
+                <div class="question-difficulty" id="aptitudeQuestionNumber">سؤال 1</div>
+                <h2 class="question-text" id="aptitudeQuestionText">جاري التحميل...</h2>
+                <div class="options-list" id="aptitudeOptionsList"></div>
+            </div>
+        </div>
+
+        <div class="assessment-actions">
+            <button class="btn btn-outline" onclick="skipAptitudeQuestion()">
+                <i class="fas fa-forward"></i> تخطي السؤال
+            </button>
+            <button class="btn btn-outline" onclick="prevAptitudeQuestion()" id="aptitudePrevBtn" style="display:none;">
+                <i class="fas fa-arrow-right"></i> السابق
+            </button>
+            <button class="btn btn-primary" onclick="finishAndAnalyze()">
+                <i class="fas fa-rocket"></i> حفظ وتحليل
+            </button>
+        </div>
     </div>
 
-    <div class="assessment-actions">
-        <button class="btn btn-outline" id="skipBtn" onclick="skipQuestion()">تخطي السؤال ⏭️</button>
-        <button class="btn btn-outline" id="prevBtn" onclick="prevQuestion()" style="display:none;">السابق</button>
+    <!-- المرحلة 2: أسئلة المواد -->
+    <div id="subjectSection" style="display: none;">
+        <div class="subject-card" id="subjectCard">
+            <div class="subject-card-header">
+                <h3 class="subject-name" id="currentSubjectName">
+                    <i class="fas fa-book"></i> -
+                </h3>
+                <button class="btn-skip-subject" onclick="skipCurrentSubject()">
+                    <i class="fas fa-forward"></i> تخطي المادة
+                </button>
+            </div>
+
+            <div class="subject-question-body">
+                <div class="question-difficulty" id="questionDifficulty">-</div>
+                <h2 class="question-text" id="subjectQuestionText">-</h2>
+                <div class="options-list" id="subjectOptionsList"></div>
+            </div>
+        </div>
+
+        <div class="assessment-actions">
+            <button class="btn btn-outline" onclick="skipSubjectQuestion()">
+                <i class="fas fa-forward"></i> تخطي السؤال
+            </button>
+            <button class="btn btn-outline" onclick="prevSubjectQuestion()" id="subjectPrevBtn" style="display:none;">
+                <i class="fas fa-arrow-right"></i> السابق
+            </button>
+            <button class="btn btn-primary" onclick="finishAndAnalyze()">
+                <i class="fas fa-rocket"></i> حفظ وتحليل
+            </button>
+        </div>
     </div>
 
+    <!-- قسم الإرسال النهائي (يظهر فقط عند إنهاء كل الأسئلة) -->
     <div id="submitSection" style="display:none; text-align:center; margin-top: 30px;">
-        <button class="btn btn-primary btn-lg" onclick="submitAssessment()">إرسال النتائج 📊</button>
+        <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 1.1rem;">
+            ✅ اكتمل الاختبار. اضغط للحصول على التوصيات.
+        </p>
+        <button class="btn btn-primary btn-lg" onclick="submitAssessment()" id="submitBtn">
+            <i class="fas fa-chart-line"></i> حفظ النتائج وعرض التوصيات
+        </button>
     </div>
 </div>
 
-<!-- تخزين بيانات الأسئلة بتنسيق JSON آمن -->
-<script type="application/json" id="questions-data">{{ questions | tojson }}</script>
+<!-- تخزين البيانات من الخادم -->
+<script type="application/json" id="aptitude-questions-json">{{ aptitude_questions | tojson }}</script>
+<script type="application/json" id="subject-questions-json">{{ subject_questions | tojson }}</script>
+<script type="application/json" id="branch-json">{{ branch | tojson }}</script>
 
 <style>
     .assessment-container {
-        max-width: 700px;
+        max-width: 850px;
         margin: 0 auto;
         padding: 0 16px;
     }
@@ -48,18 +115,28 @@
         margin-bottom: 24px;
     }
     .assessment-header h1 {
-        font-size: 2rem;
+        font-size: 2.2rem;
         font-weight: 700;
         margin-bottom: 8px;
     }
     .assessment-header p {
         color: var(--text-secondary);
-        font-size: 1rem;
+        font-size: 1.1rem;
+    }
+    .branch-indicator {
+        display: inline-block;
+        margin-top: 12px;
+        padding: 8px 20px;
+        background: var(--accent-light);
+        color: var(--accent);
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 1.05rem;
     }
     .progress-container {
         background: var(--bg-elevated);
         border-radius: 20px;
-        height: 10px;
+        height: 12px;
         margin-bottom: 8px;
         overflow: hidden;
         border: 1px solid var(--border-color);
@@ -73,39 +150,110 @@
     .progress-text {
         text-align: center;
         color: var(--text-muted);
-        font-size: 0.9rem;
-        margin-bottom: 20px;
+        font-size: 1rem;
+        margin-bottom: 28px;
     }
-    .question-card {
+
+    /* بطاقة موحدة (الميول + المواد) */
+    .subject-card {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-lg);
-        padding: 28px;
         box-shadow: var(--shadow-sm);
         margin-bottom: 20px;
+        overflow: hidden;
+    }
+    .subject-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 28px;
+        background: var(--bg-elevated);
+        border-bottom: 1px solid var(--border-color);
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .subject-name {
+        margin: 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .btn-skip-subject {
+        background: transparent;
+        border: 1px solid var(--danger);
+        color: var(--danger);
+        padding: 10px 18px;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all var(--transition-fast);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: inherit;
+    }
+    .btn-skip-subject:hover {
+        background: var(--danger);
+        color: white;
+    }
+    .subject-question-body {
+        padding: 32px 36px;
+    }
+    .question-difficulty {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+        background: var(--accent-light);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+    }
+    .question-difficulty.سهل {
+        background: #d1fae5;
+        color: #065f46;
+        border-color: #10b981;
+    }
+    .question-difficulty.متوسط {
+        background: #fef3c7;
+        color: #92400e;
+        border-color: #f59e0b;
+    }
+    .question-difficulty.صعب {
+        background: #fee2e2;
+        color: #991b1b;
+        border-color: #ef4444;
     }
     .question-text {
-        font-size: 1.3rem;
+        font-size: 1.55rem;
         font-weight: 600;
-        margin-bottom: 20px;
-        line-height: 1.5;
+        margin-bottom: 24px;
+        line-height: 1.6;
+        color: var(--text-primary);
     }
     .options-list {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 14px;
     }
     .option-item {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 14px 16px;
+        gap: 14px;
+        padding: 16px 20px;
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         background: var(--bg-elevated);
         cursor: pointer;
         transition: background var(--transition-fast), border-color var(--transition-fast);
-        font-size: 1rem;
+        font-size: 1.1rem;
+        line-height: 1.5;
     }
     .option-item:hover {
         background: var(--surface-hover);
@@ -116,153 +264,431 @@
         background: var(--accent-light);
     }
     .option-item input[type="radio"] {
-        width: auto;
+        width: 20px;
+        height: 20px;
         margin: 0;
+        cursor: pointer;
+        flex-shrink: 0;
     }
     .assessment-actions {
         display: flex;
         gap: 12px;
         justify-content: center;
         flex-wrap: wrap;
+        margin-top: 20px;
+        padding: 0 4px;
     }
-    .btn-lg {
-        width: 100%;
-        padding: 14px;
-        font-size: 1.1rem;
+    .assessment-actions .btn {
+        padding: 12px 24px;
+        font-size: 1rem;
         font-weight: 600;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
         gap: 8px;
     }
+    .btn-lg {
+        padding: 16px 40px;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
     @media (max-width: 480px) {
-        .question-text {
-            font-size: 1.1rem;
-        }
-        .option-item {
-            padding: 12px;
-            font-size: 0.9rem;
-        }
+        .assessment-header h1 { font-size: 1.6rem; }
+        .subject-name { font-size: 1.15rem; }
+        .btn-skip-subject { font-size: 0.8rem; padding: 6px 12px; }
+        .question-text { font-size: 1.2rem; }
+        .option-item { padding: 12px 14px; font-size: 0.95rem; }
+        .subject-question-body { padding: 20px; }
+        .subject-card-header { padding: 14px 16px; }
+        .assessment-actions .btn { padding: 10px 16px; font-size: 0.9rem; }
     }
 </style>
 
 <script>
-(function() {
-    // قراءة الأسئلة من عنصر JSON الآمن
-    const questionsDataElement = document.getElementById('questions-data');
-    const aptitudeQuestionsData = JSON.parse(questionsDataElement.textContent);
+(function () {
+    // ==========================================
+    // قراءة البيانات
+    // ==========================================
+    const aptitudeQuestions = JSON.parse(document.getElementById('aptitude-questions-json').textContent);
+    const subjectQuestions = JSON.parse(document.getElementById('subject-questions-json').textContent);
+    const branch = JSON.parse(document.getElementById('branch-json').textContent);
 
-    let currentIndex = 0;
-    const answers = {};
+    // ==========================================
+    // الحالة
+    // ==========================================
+    const state = {
+        phase: 'aptitude',
+        aptitudeIndex: 0,
+        subjectKeys: Object.keys(subjectQuestions),
+        subjectIndex: 0,
+        questionIndex: 0,
+        aptitudeAnswers: {},
+        subjectAnswers: {},
+        skippedSubjects: []
+    };
 
-    function renderQuestion() {
-        if (currentIndex >= aptitudeQuestionsData.length) {
-            showSubmitSection();
+    const totalAptitudeQuestions = aptitudeQuestions.length;
+    let totalSubjectQuestions = 0;
+    for (const key of state.subjectKeys) {
+        totalSubjectQuestions += subjectQuestions[key].questions.length;
+    }
+    const totalQuestions = totalAptitudeQuestions + totalSubjectQuestions;
+
+    // ==========================================
+    // التقدم
+    // ==========================================
+    function updateProgress() {
+        let completed = 0;
+        if (state.phase === 'aptitude') {
+            completed = state.aptitudeIndex;
+        } else {
+            completed = totalAptitudeQuestions + countAnsweredSubjectQuestions();
+        }
+        const progress = (completed / totalQuestions) * 100;
+        document.getElementById('progressBar').style.width = progress + '%';
+
+        if (state.phase === 'aptitude') {
+            document.getElementById('progressText').textContent =
+                `المرحلة 1: سؤال ${state.aptitudeIndex + 1} من ${totalAptitudeQuestions}`;
+        } else {
+            if (state.subjectIndex >= state.subjectKeys.length) {
+                document.getElementById('progressText').textContent = 'اكتمل الاختبار!';
+                return;
+            }
+            const subj = subjectQuestions[state.subjectKeys[state.subjectIndex]];
+            document.getElementById('progressText').textContent =
+                `المرحلة 2: ${subj.name} - سؤال ${state.questionIndex + 1} من ${subj.questions.length}`;
+        }
+    }
+
+    function countAnsweredSubjectQuestions() {
+        let count = 0;
+        for (const key of state.subjectKeys) {
+            if (state.skippedSubjects.includes(key)) {
+                count += subjectQuestions[key].questions.length;
+                continue;
+            }
+            for (const q of subjectQuestions[key].questions) {
+                if (state.subjectAnswers[q.id] !== undefined ||
+                    state.subjectAnswers[q.id + '_skipped'] === true) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    // ==========================================
+    // عرض أسئلة الميول
+    // ==========================================
+    function renderAptitudeQuestion() {
+        if (state.aptitudeIndex >= aptitudeQuestions.length) {
+            goToSubjectPhase();
             return;
         }
 
-        const q = aptitudeQuestionsData[currentIndex];
-        document.getElementById('questionText').textContent = q.text;
-        const optionsContainer = document.getElementById('optionsList');
+        const q = aptitudeQuestions[state.aptitudeIndex];
+        document.getElementById('aptitudeQuestionNumber').textContent =
+            `سؤال ${state.aptitudeIndex + 1} من ${aptitudeQuestions.length}`;
+        document.getElementById('aptitudeQuestionText').textContent = q.text;
+        const optionsContainer = document.getElementById('aptitudeOptionsList');
         optionsContainer.innerHTML = '';
 
         q.options.forEach(option => {
             const label = document.createElement('label');
-            label.className = 'option-item' + (answers[q.id] === option.id ? ' selected' : '');
+            label.className = 'option-item' + (state.aptitudeAnswers[q.id] === option.id ? ' selected' : '');
+
             const input = document.createElement('input');
             input.type = 'radio';
-            input.name = `question_${q.id}`;
+            input.name = 'apt_' + q.id;
             input.value = option.id;
-            if (answers[q.id] === option.id) {
+            if (state.aptitudeAnswers[q.id] === option.id) {
                 input.checked = true;
             }
             label.appendChild(input);
+
             const span = document.createElement('span');
             span.textContent = option.text;
             label.appendChild(span);
-            label.addEventListener('click', function() {
-                selectOption(q.id, option.id);
+
+            label.addEventListener('click', function (e) {
+                if (e.target.tagName !== 'INPUT') {
+                    selectAptitudeOption(q.id, option.id);
+                }
             });
+
             optionsContainer.appendChild(label);
         });
 
-        const progress = (currentIndex / aptitudeQuestionsData.length) * 100;
-        document.getElementById('progressBar').style.width = progress + '%';
-        document.getElementById('progressText').textContent = `السؤال ${currentIndex + 1} من ${aptitudeQuestionsData.length}`;
-        document.getElementById('prevBtn').style.display = currentIndex > 0 ? 'inline-flex' : 'none';
-        document.getElementById('submitSection').style.display = 'none';
+        document.getElementById('aptitudePrevBtn').style.display =
+            state.aptitudeIndex > 0 ? 'inline-flex' : 'none';
+
+        updateProgress();
     }
 
-    function selectOption(questionId, optionId) {
-        answers[questionId] = optionId;
-        document.querySelectorAll('.option-item').forEach(item => item.classList.remove('selected'));
-        const selectedInput = document.querySelector(`input[name="question_${questionId}"][value="${optionId}"]`);
+    function selectAptitudeOption(questionId, optionId) {
+        state.aptitudeAnswers[questionId] = optionId;
+        document.querySelectorAll('#aptitudeOptionsList .option-item').forEach(item => item.classList.remove('selected'));
+        const selectedInput = document.querySelector(`input[name="apt_${questionId}"][value="${optionId}"]`);
         if (selectedInput) {
             selectedInput.closest('.option-item').classList.add('selected');
         }
-        setTimeout(() => nextQuestion(), 200);
+        setTimeout(() => {
+            state.aptitudeIndex++;
+            renderAptitudeQuestion();
+        }, 200);
     }
 
-    function nextQuestion() {
-        currentIndex++;
-        renderQuestion();
-    }
+    window.skipAptitudeQuestion = function () {
+        state.aptitudeIndex++;
+        renderAptitudeQuestion();
+    };
 
-    function prevQuestion() {
-        if (currentIndex > 0) {
-            currentIndex--;
-            renderQuestion();
+    window.prevAptitudeQuestion = function () {
+        if (state.aptitudeIndex > 0) {
+            state.aptitudeIndex--;
+            renderAptitudeQuestion();
         }
-    }
+    };
 
-    function skipQuestion() {
-        nextQuestion();
-    }
+    window.skipAllAptitude = function () {
+        for (const q of aptitudeQuestions) {
+            state.aptitudeAnswers[q.id + '_skipped'] = true;
+        }
+        state.aptitudeIndex = aptitudeQuestions.length;
+        goToSubjectPhase();
+    };
 
-    function showSubmitSection() {
-        document.getElementById('questionCard').style.display = 'none';
-        document.getElementById('skipBtn').style.display = 'none';
-        document.getElementById('prevBtn').style.display = 'none';
-        document.getElementById('progressBar').style.width = '100%';
-        document.getElementById('progressText').textContent = 'اكتمل الاختبار!';
-        document.getElementById('submitSection').style.display = 'block';
-    }
-
-    async function submitAssessment() {
-        const submitBtn = document.querySelector('#submitSection .btn');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+    // ==========================================
+    // حفظ وتحليل → /analyze
+    // ==========================================
+    window.finishAndAnalyze = async function () {
+        const cleanAptitudeAnswers = {};
+        for (const [k, v] of Object.entries(state.aptitudeAnswers)) {
+            if (!k.endsWith('_skipped')) cleanAptitudeAnswers[k] = v;
+        }
+        const cleanSubjectAnswers = {};
+        for (const [k, v] of Object.entries(state.subjectAnswers)) {
+            if (!k.endsWith('_skipped')) cleanSubjectAnswers[k] = v;
+        }
 
         try {
             const response = await fetch('{{ url_for("student.submit_assessment") }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ answers: answers })
+                body: JSON.stringify({
+                    aptitude_answers: cleanAptitudeAnswers,
+                    subject_answers: cleanSubjectAnswers
+                })
             });
 
             const data = await response.json();
             if (data.success) {
-                showToast('✅ تم حفظ نتائج الاختبار بنجاح!', 'success');
+                showToast('✅ تم الحفظ، جاري التحليل...', 'success');
                 setTimeout(() => {
                     window.location.href = '{{ url_for("student.analyze") }}';
-                }, 1500);
+                }, 1000);
+            } else {
+                showToast('❌ حدث خطأ أثناء الحفظ.', 'danger');
+            }
+        } catch (error) {
+            showToast('❌ خطأ في الاتصال بالخادم.', 'danger');
+        }
+    };
+
+    // ==========================================
+    // الانتقال للمواد
+    // ==========================================
+    function goToSubjectPhase() {
+        if (state.subjectKeys.length === 0) {
+            showSubmitSection();
+            return;
+        }
+        state.phase = 'subject';
+        state.subjectIndex = 0;
+        state.questionIndex = 0;
+        document.getElementById('aptitudeSection').style.display = 'none';
+        document.getElementById('subjectSection').style.display = 'block';
+        renderSubjectQuestion();
+    }
+
+    // ==========================================
+    // عرض أسئلة المواد
+    // ==========================================
+    function renderSubjectQuestion() {
+        if (state.subjectIndex >= state.subjectKeys.length) {
+            showSubmitSection();
+            return;
+        }
+
+        const subjKey = state.subjectKeys[state.subjectIndex];
+        const subjData = subjectQuestions[subjKey];
+        const questions = subjData.questions;
+
+        if (state.questionIndex >= questions.length) {
+            state.subjectIndex++;
+            state.questionIndex = 0;
+            renderSubjectQuestion();
+            return;
+        }
+
+        const q = questions[state.questionIndex];
+
+        document.getElementById('currentSubjectName').innerHTML =
+            `<i class="fas fa-book"></i> ${subjData.name}`;
+
+        const diffEl = document.getElementById('questionDifficulty');
+        diffEl.textContent = 'مستوى: ' + q.difficulty;
+        diffEl.className = 'question-difficulty ' + q.difficulty;
+
+        document.getElementById('subjectQuestionText').textContent = q.text;
+        const optionsContainer = document.getElementById('subjectOptionsList');
+        optionsContainer.innerHTML = '';
+
+        q.options.forEach(option => {
+            const label = document.createElement('label');
+            label.className = 'option-item' + (state.subjectAnswers[q.id] === option.id ? ' selected' : '');
+
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'subj_' + q.id;
+            input.value = option.id;
+            if (state.subjectAnswers[q.id] === option.id) {
+                input.checked = true;
+            }
+            label.appendChild(input);
+
+            const span = document.createElement('span');
+            span.textContent = option.text;
+            label.appendChild(span);
+
+            label.addEventListener('click', function (e) {
+                if (e.target.tagName !== 'INPUT') {
+                    selectSubjectOption(q.id, option.id);
+                }
+            });
+
+            optionsContainer.appendChild(label);
+        });
+
+        document.getElementById('subjectPrevBtn').style.display =
+            (state.questionIndex > 0 || state.subjectIndex > 0) ? 'inline-flex' : 'none';
+
+        updateProgress();
+    }
+
+    function selectSubjectOption(questionId, optionId) {
+        state.subjectAnswers[questionId] = optionId;
+        document.querySelectorAll('#subjectOptionsList .option-item').forEach(item => item.classList.remove('selected'));
+        const selectedInput = document.querySelector(`input[name="subj_${questionId}"][value="${optionId}"]`);
+        if (selectedInput) {
+            selectedInput.closest('.option-item').classList.add('selected');
+        }
+        setTimeout(() => {
+            state.questionIndex++;
+            renderSubjectQuestion();
+        }, 200);
+    }
+
+    window.skipSubjectQuestion = function () {
+        const subjKey = state.subjectKeys[state.subjectIndex];
+        const q = subjectQuestions[subjKey].questions[state.questionIndex];
+        state.subjectAnswers[q.id + '_skipped'] = true;
+        state.questionIndex++;
+        renderSubjectQuestion();
+    };
+
+    window.prevSubjectQuestion = function () {
+        if (state.questionIndex > 0) {
+            state.questionIndex--;
+        } else if (state.subjectIndex > 0) {
+            state.subjectIndex--;
+            const prevSubj = subjectQuestions[state.subjectKeys[state.subjectIndex]];
+            state.questionIndex = prevSubj.questions.length - 1;
+        }
+        renderSubjectQuestion();
+    };
+
+    window.skipCurrentSubject = function () {
+        const subjKey = state.subjectKeys[state.subjectIndex];
+
+        for (const q of subjectQuestions[subjKey].questions) {
+            state.subjectAnswers[q.id + '_skipped'] = true;
+        }
+        if (!state.skippedSubjects.includes(subjKey)) {
+            state.skippedSubjects.push(subjKey);
+        }
+
+        state.subjectIndex++;
+        state.questionIndex = 0;
+
+        if (state.subjectIndex >= state.subjectKeys.length) {
+            showSubmitSection();
+            return;
+        }
+
+        renderSubjectQuestion();
+    };
+
+    // ==========================================
+    // إظهار قسم الإرسال
+    // ==========================================
+    function showSubmitSection() {
+        document.getElementById('aptitudeSection').style.display = 'none';
+        document.getElementById('subjectSection').style.display = 'none';
+        document.getElementById('progressBar').style.width = '100%';
+        document.getElementById('progressText').textContent = 'اكتمل الاختبار!';
+        document.getElementById('submitSection').style.display = 'block';
+    }
+
+    // ==========================================
+    // إرسال النتائج → تحليل + توصيات
+    // ==========================================
+    window.submitAssessment = async function () {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الإرسال...';
+
+        const cleanAptitudeAnswers = {};
+        for (const [k, v] of Object.entries(state.aptitudeAnswers)) {
+            if (!k.endsWith('_skipped')) cleanAptitudeAnswers[k] = v;
+        }
+        const cleanSubjectAnswers = {};
+        for (const [k, v] of Object.entries(state.subjectAnswers)) {
+            if (!k.endsWith('_skipped')) cleanSubjectAnswers[k] = v;
+        }
+
+        try {
+            const response = await fetch('{{ url_for("student.submit_assessment") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    aptitude_answers: cleanAptitudeAnswers,
+                    subject_answers: cleanSubjectAnswers
+                })
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                showToast('✅ تم الحفظ، جاري التحليل...', 'success');
+                setTimeout(() => {
+                    window.location.href = '{{ url_for("student.analyze") }}';
+                }, 1000);
             } else {
                 showToast('❌ حدث خطأ أثناء الحفظ.', 'danger');
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'إرسال النتائج 📊';
+                submitBtn.innerHTML = '<i class="fas fa-chart-line"></i> حفظ النتائج وعرض التوصيات';
             }
         } catch (error) {
             showToast('❌ خطأ في الاتصال بالخادم.', 'danger');
             submitBtn.disabled = false;
-            submitBtn.innerHTML = 'إرسال النتائج 📊';
+            submitBtn.innerHTML = '<i class="fas fa-chart-line"></i> حفظ النتائج وعرض التوصيات';
         }
-    }
+    };
 
-    window.skipQuestion = skipQuestion;
-    window.prevQuestion = prevQuestion;
-    window.submitAssessment = submitAssessment;
-
-    renderQuestion();
+    // ==========================================
+    // بدء الاختبار
+    // ==========================================
+    renderAptitudeQuestion();
 })();
 </script>
 {% endblock %}
