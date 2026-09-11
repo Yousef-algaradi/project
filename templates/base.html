@@ -1,6 +1,7 @@
 <!-- templates/base.html -->
 <!DOCTYPE html>
 <html dir="rtl" lang="ar" data-theme="light">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
-        /* تنسيقات الشريط العلوي */
+        /* ==========================================
+           NAVBAR
+           ========================================== */
         .navbar-container {
             display: flex;
             justify-content: space-between;
@@ -19,12 +22,14 @@
             min-height: 80px;
             gap: 20px;
         }
+
         .navbar-brand {
             display: flex;
             align-items: center;
             gap: 12px;
             flex-shrink: 0;
         }
+
         .logo {
             font-size: 1.8rem;
             font-weight: bold;
@@ -34,9 +39,9 @@
             text-decoration: none;
             color: var(--text, #1e293b);
         }
-        .logo-icon {
-            font-size: 2.2rem;
-        }
+
+        .logo-icon { font-size: 2.2rem; }
+
         .navbar-actions {
             display: flex;
             align-items: center;
@@ -44,6 +49,7 @@
             flex-wrap: wrap;
             justify-content: flex-end;
         }
+
         .mobile-menu-toggle {
             display: none;
             font-size: 2rem;
@@ -52,7 +58,7 @@
             cursor: pointer;
             color: var(--text, #1e293b);
         }
-        /* زر الرجوع */
+
         .btn-outline {
             font-size: 1.2rem;
             padding: 12px 28px;
@@ -66,10 +72,8 @@
             gap: 10px;
             transition: all 0.2s;
         }
-        .btn-outline:hover {
-            background: #f1f5f9;
-        }
-        /* الأزرار الأيقونية */
+        .btn-outline:hover { background: #f1f5f9; }
+
         .icon-btn {
             font-size: 1.3rem !important;
             padding: 10px 16px;
@@ -83,19 +87,160 @@
             gap: 8px;
             transition: all 0.2s;
         }
-        .icon-btn i {
-            font-size: 1.6rem;
+        .icon-btn i { font-size: 1.6rem; }
+        .icon-btn:hover { background: #f1f5f9; border-color: #e2e8f0; }
+
+        /* ==========================================
+           قائمة "حساباتي"
+           ========================================== */
+        .account-menu { position: relative; display: inline-block; }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            left: auto;
+            min-width: 240px;
+            max-width: 280px;
+            background: var(--bg-card, #ffffff);
+            border: 1px solid var(--border-color, #e2e8f0);
+            border-radius: 14px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+            padding: 8px;
+            z-index: 1100;
+            overflow: hidden;
+            animation: dropdownFadeIn 0.15s ease;
         }
-        .icon-btn:hover {
-            background: #f1f5f9;
-            border-color: #e2e8f0;
+        .dropdown-content.show { display: block; }
+        @keyframes dropdownFadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        /* عند الجوال */
+        .dropdown-content a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            color: var(--text-primary, #1e293b);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: background 0.15s, color 0.15s;
+        }
+        .dropdown-content a:hover {
+            background: var(--accent-light, #eef2ff);
+            color: var(--accent, #4f46e5);
+        }
+        .dropdown-content a i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+            color: var(--accent, #4f46e5);
+            flex-shrink: 0;
+        }
+        .dropdown-content a span { flex: 1; }
+        .dropdown-content .divider {
+            height: 1px;
+            background: var(--border-color, #e2e8f0);
+            margin: 6px 8px;
+        }
+        .dropdown-content a.logout-link { color: #dc2626; }
+        .dropdown-content a.logout-link i { color: #dc2626; }
+        .dropdown-content a.logout-link:hover { background: #fee2e2; color: #b91c1c; }
+
+        /* ==========================================
+           Global Confirm Modal (نسخة واحدة نهائية)
+           ========================================== */
+        .gcm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 20px;
+            animation: gcmFadeIn 0.2s ease;
+        }
+        .gcm-overlay.show { display: flex; }
+        @keyframes gcmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .gcm-box {
+            background: var(--bg-card, #fff);
+            border: 1px solid var(--border-color, #e2e8f0);
+            border-radius: 20px;
+            padding: 36px 32px 28px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            animation: gcmBoxIn 0.25s ease;
+        }
+        @keyframes gcmBoxIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .gcm-icon { font-size: 3.5rem; margin-bottom: 16px; line-height: 1; }
+
+        .gcm-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--text-primary, #1e293b);
+        }
+
+        .gcm-message {
+            color: var(--text-secondary, #64748b);
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 28px;
+            white-space: pre-line;
+        }
+
+        .gcm-actions { display: flex; flex-direction: column; gap: 12px; }
+
+        .gcm-btn {
+            width: 100%;
+            padding: 15px 22px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .gcm-btn-confirm { background: #10b981; color: #ffffff; }
+        .gcm-btn-confirm:hover { background: #059669; }
+        .gcm-btn-confirm.danger { background: #dc2626; }
+        .gcm-btn-confirm.danger:hover { background: #b91c1c; }
+
+        .gcm-btn-cancel {
+            background: transparent;
+            color: var(--text-primary, #1e293b);
+            border: 1px solid var(--border-color, #e2e8f0);
+        }
+        .gcm-btn-cancel:hover { background: var(--bg-elevated, #f1f5f9); }
+
+        [data-theme="dark"] .gcm-box { background: #1e293b; border-color: #334155; }
+        [data-theme="dark"] .gcm-title { color: #f1f5f9; }
+        [data-theme="dark"] .gcm-message { color: #cbd5e1; }
+        [data-theme="dark"] .gcm-btn-cancel { color: #f1f5f9; border-color: #334155; }
+        [data-theme="dark"] .gcm-btn-cancel:hover { background: #273449; }
+
+        /* ==========================================
+           MOBILE
+           ========================================== */
         @media (max-width: 768px) {
-            .mobile-menu-toggle {
-                display: inline-flex;
-                align-items: center;
-            }
+            .mobile-menu-toggle { display: inline-flex; align-items: center; }
             .navbar-actions {
                 position: absolute;
                 top: 80px;
@@ -106,25 +251,31 @@
                 align-items: flex-start;
                 padding: 20px;
                 display: none;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 z-index: 1000;
                 gap: 15px;
             }
-            .navbar-actions.active {
-                display: flex;
-            }
-            .btn-outline {
-                font-size: 1.1rem;
-                padding: 10px 20px;
+            .navbar-actions.active { display: flex; }
+            .btn-outline { font-size: 1.1rem; padding: 10px 20px; }
+        }
+
+        @media (max-width: 600px) {
+            .account-menu { position: static; }
+            .dropdown-content {
+                position: fixed;
+                top: 90px;
+                inset-inline: 16px;
+                max-width: none;
+                width: auto;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- شريط التنقل الرئيسي -->
     <header class="navbar" role="banner">
         <div class="navbar-container">
-            <!-- الشعار وزر القائمة للجوال -->
             <div class="navbar-brand">
                 <a href="{{ url_for('main.index') }}" class="logo" aria-label="المستشار الأكاديمي - الصفحة الرئيسية">
                     <i class="fas fa-graduation-cap logo-icon"></i>
@@ -135,35 +286,42 @@
                 </button>
             </div>
 
-            <!-- القائمة الرئيسية (أزرار وأيقونات) - في اليسار -->
             <nav class="navbar-actions" id="navbarActions" aria-label="قائمة التنقل">
-                <!-- زر الرجوع -->
                 <a href="javascript:history.back()" class="btn-outline" style="margin-left: 10px;">
                     <i class="fas fa-arrow-right"></i> رجوع
                 </a>
-                <!-- أزرار المساعدة واللغة والثيم -->
                 <button onclick="toggleHelp()" title="مساعدة" class="icon-btn" aria-label="مساعدة">
                     <i class="fas fa-question-circle"></i>
                     <span class="icon-label">مساعدة</span>
-                
+                </button>
                 <button onclick="toggleTheme()" title="الوضع المظلم/الفاتح" class="icon-btn" aria-label="تبديل الثيم">
                     <i class="fas fa-moon"></i>
                     <span class="icon-label">الثيم</span>
                 </button>
-                <!-- منطقة الحساب فقط عند تسجيل الدخول -->
                 {% if session.user_id %}
-                    <div class="account-menu">
-                        <button onclick="toggleAccountMenu()" class="icon-btn" aria-label="الحساب" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-user-circle"></i>
-                            <span class="icon-label">الحساب</span>
-                        </button>
-                        <div id="accountDropdown" class="dropdown-content">
-                            <a href="{{ url_for('dashboard.home') }}"><i class="fas fa-tachometer-alt"></i> لوحة التحكم</a>
-                            <a href="{{ url_for('student.profile') }}"><i class="fas fa-edit"></i> بياناتي</a>
-                            <div class="divider"></div>
-                            <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> تسجيل خروج</a>
-                        </div>
+                <div class="account-menu">
+                    <button onclick="toggleAccountMenu(event)" class="icon-btn" aria-label="الحساب" aria-haspopup="true"
+                        aria-expanded="false">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="icon-label">الحساب</span>
+                    </button>
+                    <div id="accountDropdown" class="dropdown-content" role="menu">
+                        <a href="{{ url_for('dashboard.home') }}" role="menuitem">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>لوحة التحكم</span>
+                        </a>
+                        <a href="{{ url_for('student.profile') }}" role="menuitem">
+                            <i class="fas fa-edit"></i>
+                            <span>بياناتي</span>
+                        </a>
+                        <div class="divider"></div>
+                        <a href="{{ url_for('auth.logout') }}" class="logout-link" role="menuitem"
+                            onclick="return confirmLogout(event);">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>تسجيل خروج</span>
+                        </a>
                     </div>
+                </div>
                 {% endif %}
             </nav>
         </div>
@@ -183,12 +341,31 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- حاوية التنبيهات المنبثقة -->
+    <!-- حاوية التنبيهات -->
     <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- ==========================================
+         Global Confirm Modal — نسخة وحيدة نهائية
+         ========================================== -->
+    <div id="globalConfirmModal" class="gcm-overlay" role="dialog" aria-modal="true" aria-labelledby="gcmTitle">
+        <div class="gcm-box">
+            <div class="gcm-icon" id="gcmIcon">⚠️</div>
+            <h2 class="gcm-title" id="gcmTitle">تأكيد</h2>
+            <p class="gcm-message" id="gcmMessage">هل أنت متأكد؟</p>
+            <div class="gcm-actions">
+                <button type="button" class="gcm-btn gcm-btn-confirm" id="gcmConfirmBtn">
+                    <i class="fas fa-check"></i> موافق
+                </button>
+                <button type="button" class="gcm-btn gcm-btn-cancel" id="gcmCancelBtn">
+                    إلغاء الأمر
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-    <!-- بيانات رسائل الفلاش (مخزنة كـ JSON آمن) -->
+    <!-- بيانات رسائل الفلاش (JSON آمن) -->
     <script type="application/json" id="flash-messages-json">
         [
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -200,15 +377,15 @@
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // ==========================================
-            // عرض رسائل الفلاش كـ Toast (بطريقة آمنة)
-            // ==========================================
+        // ==========================================
+        // Flash Messages as Toast
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', function () {
             try {
                 const flashData = document.getElementById('flash-messages-json');
                 if (flashData) {
                     const messages = JSON.parse(flashData.textContent);
-                    messages.forEach(function(item) {
+                    messages.forEach(function (item) {
                         if (typeof showToast === 'function') {
                             showToast(item.message, item.category);
                         }
@@ -218,22 +395,134 @@
                 console.error('خطأ في عرض رسائل الفلاش:', e);
             }
 
-            // ==========================================
-            // تفعيل زر القائمة للجوال
-            // ==========================================
+            // Mobile Menu Toggle
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const navbarActions = document.getElementById('navbarActions');
             if (mobileMenuToggle && navbarActions) {
-                mobileMenuToggle.addEventListener('click', function() {
+                mobileMenuToggle.addEventListener('click', function () {
                     const expanded = this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true';
                     this.setAttribute('aria-expanded', expanded);
                     navbarActions.classList.toggle('active');
                 });
-                document.addEventListener('click', function(event) {
+                document.addEventListener('click', function (event) {
                     if (!navbarActions.contains(event.target) && event.target !== mobileMenuToggle) {
                         mobileMenuToggle.setAttribute('aria-expanded', 'false');
                         navbarActions.classList.remove('active');
                     }
+                });
+            }
+
+            // ==========================================
+            // Global Confirm Modal — Bind Buttons
+            // ==========================================
+            const confirmBtn = document.getElementById('gcmConfirmBtn');
+            const cancelBtn = document.getElementById('gcmCancelBtn');
+            const modal = document.getElementById('globalConfirmModal');
+
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const cb = window._gcmCallback;
+                    window.hideGlobalConfirm();
+                    if (typeof cb === 'function') {
+                        try { cb(); } catch (err) { console.error(err); }
+                    }
+                });
+            }
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    window.hideGlobalConfirm();
+                });
+            }
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) window.hideGlobalConfirm();
+                });
+            }
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && modal && modal.classList.contains('show')) {
+                    window.hideGlobalConfirm();
+                }
+            });
+        });
+
+        // ==========================================
+        // Global Confirm Functions
+        // ==========================================
+        window._gcmCallback = null;
+
+        window.showGlobalConfirm = function (options) {
+            const modal = document.getElementById('globalConfirmModal');
+            if (!modal) return;
+
+            document.getElementById('gcmIcon').textContent = options.icon || '⚠️';
+            document.getElementById('gcmTitle').textContent = options.title || 'تأكيد';
+            document.getElementById('gcmMessage').textContent = options.message || 'هل أنت متأكد؟';
+
+            const confirmBtn = document.getElementById('gcmConfirmBtn');
+            const isDanger = options.danger === true;
+            confirmBtn.className = 'gcm-btn gcm-btn-confirm' + (isDanger ? ' danger' : '');
+            confirmBtn.innerHTML = '<i class="fas fa-' + (isDanger ? 'trash' : 'check') + '"></i> ' + (options.confirmText || 'موافق');
+
+            document.getElementById('gcmCancelBtn').textContent = options.cancelText || 'إلغاء الأمر';
+
+            window._gcmCallback = options.onConfirm || null;
+            modal.classList.add('show');
+        };
+
+        window.hideGlobalConfirm = function () {
+            const modal = document.getElementById('globalConfirmModal');
+            if (modal) modal.classList.remove('show');
+            window._gcmCallback = null;
+        };
+
+        // ==========================================
+        // Logout Handler
+        // ==========================================
+        window.confirmLogout = function (event) {
+            if (event) event.preventDefault();
+            window.showGlobalConfirm({
+                icon: '👋',
+                title: 'تسجيل الخروج',
+                message: 'هل تريد تسجيل الخروج من حسابك؟',
+                confirmText: 'نعم، سجّل الخروج',
+                cancelText: 'إلغاء الأمر',
+                danger: false,
+                onConfirm: function () {
+                    window.location.href = '{{ url_for("auth.logout") }}';
+                }
+            });
+            return false;
+        };
+
+        // ==========================================
+        // Account Dropdown Toggle
+        // ==========================================
+        window.toggleAccountMenu = function (event) {
+            if (event) { event.stopPropagation(); event.preventDefault(); }
+            const dropdown = document.getElementById('accountDropdown');
+            if (!dropdown) return;
+            const isOpen = dropdown.classList.contains('show');
+            document.querySelectorAll('.dropdown-content.show').forEach(function (el) {
+                el.classList.remove('show');
+            });
+            if (!isOpen) dropdown.classList.add('show');
+        };
+
+        document.addEventListener('click', function (e) {
+            const dropdown = document.getElementById('accountDropdown');
+            if (dropdown && dropdown.classList.contains('show')) {
+                if (!e.target.closest('.account-menu')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.dropdown-content.show').forEach(function (el) {
+                    el.classList.remove('show');
                 });
             }
         });
@@ -241,4 +530,5 @@
 
     {% block scripts %}{% endblock %}
 </body>
+
 </html>

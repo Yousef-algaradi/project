@@ -187,3 +187,12 @@
         init();
     }
 })();
+function showChangeMajorModal() {
+    document.getElementById('changeMajorModal').style.display = 'flex';
+}
+function hideChangeMajorModal() {
+    document.getElementById('changeMajorModal').style.display = 'none';
+}
+function confirmChangeMajor() {
+    window.location.href = "{{ url_for('university.change_major') }}";
+}

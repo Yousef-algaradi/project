@@ -1,0 +1,184 @@
+<!-- templates/welcome_choice.html -->
+{% extends "base.html" %}
+
+{% block title %}اختر مسارك - المستشار الأكاديمي{% endblock %}
+
+{% block help_title %}اختر مسارك{% endblock %}
+{% block help_content %}حدد إذا كنت طالب ثانوية أو طالب جامعي.{% endblock %}
+{% block help_step %}اضغط على المسار الذي يناسبك.{% endblock %}
+
+{% block content %}
+<div class="choice-container">
+    
+    <!-- رأس الصفحة -->
+    <header class="choice-header">
+        <h1>🎯 أهلاً بك {{ user.name }}!</h1>
+        <p>قبل أن نبدأ، أخبرنا: ما هو مسارك الحالي؟</p>
+    </header>
+
+    <!-- اختيار المسار -->
+    <div class="choice-cards">
+        
+        <!-- ثانوي -->
+        <a href="{{ url_for('student.profile') }}" class="choice-card">
+            <div class="choice-icon">📚</div>
+            <h2>طالب ثانوية</h2>
+            <p>أنا في المرحلة الثانوية وأبحث عن التخصص الجامعي المناسب</p>
+            <div class="choice-features">
+                <span>✓ تحليل ميولك</span>
+                <span>✓ ترشيح تخصصات</span>
+                <span>✓ خارطة طريق جامعية</span>
+            </div>
+            <div class="choice-btn">
+                <i class="fas fa-arrow-left"></i> ابدأ
+            </div>
+        </a>
+
+        <!-- جامعي -->
+        <a href="{{ url_for('university.setup') }}" class="choice-card">
+            <div class="choice-icon">🎓</div>
+            <h2>طالب جامعي</h2>
+            <p>أنا طالب جامعي وأريد تعلم المسارات المهنية من الصفر للاحتراف</p>
+            <div class="choice-features">
+                <span>✓ مسارات مهنية</span>
+                <span>✓ دورات + اختبارات</span>
+                <span>✓ XP وشهادات</span>
+            </div>
+            <div class="choice-btn">
+                <i class="fas fa-arrow-left"></i> ابدأ
+            </div>
+        </a>
+
+    </div>
+
+    <!-- ملاحظة -->
+    <p class="choice-note">
+        💡 <strong>ملاحظة:</strong> يمكنك الانتقال بين القسمين في أي وقت لاحقاً.
+    </p>
+
+</div>
+
+<style>
+    .choice-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 40px 24px;
+    }
+    .choice-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+    .choice-header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: var(--text-primary);
+    }
+    .choice-header p {
+        font-size: 1.3rem;
+        color: var(--text-secondary);
+    }
+    .choice-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 32px;
+        margin-bottom: 40px;
+    }
+    .choice-card {
+        background: var(--bg-card);
+        border: 3px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 48px 36px;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        overflow: hidden;
+    }
+    .choice-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    .choice-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+    }
+    .choice-card:hover::before {
+        transform: scaleX(1);
+    }
+    .choice-icon {
+        font-size: 5rem;
+        margin-bottom: 24px;
+    }
+    .choice-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: var(--text-primary);
+    }
+    .choice-card > p {
+        font-size: 1.15rem;
+        line-height: 1.7;
+        color: var(--text-secondary);
+        margin-bottom: 28px;
+        flex: 1;
+    }
+    .choice-features {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 28px;
+        padding: 20px;
+        background: var(--bg-elevated);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+    }
+    .choice-features span {
+        font-size: 1rem;
+        color: var(--text-primary);
+        font-weight: 500;
+        text-align: start;
+    }
+    .choice-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: var(--accent);
+        color: white;
+        padding: 16px 32px;
+        border-radius: var(--radius);
+        font-size: 1.15rem;
+        font-weight: 700;
+        transition: background 0.3s;
+    }
+    .choice-card:hover .choice-btn {
+        background: var(--accent-hover);
+    }
+    .choice-note {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 1rem;
+        margin-top: 24px;
+    }
+
+    @media (max-width: 600px) {
+        .choice-header h1 { font-size: 2rem; }
+        .choice-card { padding: 32px 24px; }
+        .choice-icon { font-size: 3.5rem; }
+        .choice-card h2 { font-size: 1.5rem; }
+    }
+</style>
+{% endblock %}

@@ -7,15 +7,20 @@ import json
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
+
 @dashboard_bp.route('/')
 @login_required
 def home():
     user_id = session['user_id']
     user = User.query.get(user_id)
     
-    # جلب جميع التوصيات مرتبة من الأحدث
-    recommendations = Recommendation.query.filter_by(user_id=user_id).order_by(Recommendation.match_percentage.desc()).all()
+    # ✅ إذا كان الطالب "جامعي" → وجّهه لداش الجامعة
+    if user.user_type == 'university':
+        return redirect(url_for('university.dashboard'))
     
-    # لا حاجة لتحويل career_paths هنا - الخاصية career_paths_list جاهزة من الموديل
+    # جلب التوصيات مرتبة تنازلياً حسب نسبة التوافق
+    recommendations = Recommendation.query.filter_by(user_id=user_id).order_by(
+        Recommendation.match_percentage.desc()
+    ).all()
     
     return render_template('dashboard.html', user=user, recommendations=recommendations)

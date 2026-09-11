@@ -1,0 +1,362 @@
+<!-- templates/university/career_path.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ career_path.title }} - المسار التعليمي{% endblock %}
+
+{% block help_title %}{{ career_path.title }}{% endblock %}
+{% block help_content %}أكمل المراحل بالترتيب لفتح المرحلة التالية.{% endblock %}
+{% block help_step %}اضغط على المرحلة المفتوحة للبدء.{% endblock %}
+
+{% block content %}
+<div class="uni-path-container">
+    
+    <!-- رأس المسار -->
+        <header class="path-header-card">
+        <!-- ✅ سهم الرجوع للداش بورد -->
+        <a href="{{ url_for('university.dashboard', track=career_path.slug) }}" 
+           class="back-to-dash" 
+           aria-label="العودة للداش بورد"
+           title="العودة للداش بورد">
+            <i class="fas fa-arrow-right"></i>
+        </a>
+
+        <div class="path-header-top">
+            <div class="path-header-info">
+                <span class="path-header-icon">{{ career_path.icon }}</span>
+                <div>
+                    <h1>{{ career_path.title }}</h1>
+                    <p>{{ career_path.description }}</p>
+                </div>
+            </div>
+            <div class="path-header-stats">
+                <div class="mini-stat">
+                    <span class="mini-stat-num">{{ status.percentage }}%</span>
+                    <span class="mini-stat-label">مكتمل</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-stat-num">{{ status.progress.total_xp }}</span>
+                    <span class="mini-stat-label">XP</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-stat-num">🔥 {{ status.progress.streak_days }}</span>
+                    <span class="mini-stat-label">Streak</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- شريط التقدم الكلي -->
+        <div class="total-progress-bar">
+            <div class="total-progress-fill" data-width="{{ status.percentage }}"></div>
+        </div>
+        <p class="progress-label">
+            ✅ {{ status.completed_count }} من {{ status.total_stages }} مراحل
+        </p>
+    </header>
+
+    <!-- قائمة المراحل -->
+    <section>
+        <h2 class="section-title">📚 المراحل التعليمية</h2>
+        
+        <div class="stages-timeline">
+            {% for item in status.stages_status %}
+            <div class="stage-item 
+                        {% if item.is_completed %}completed{% endif %}
+                        {% if item.is_current %}current{% endif %}
+                        {% if not item.is_unlocked %}locked{% endif %}">
+                
+                <!-- رقم المرحلة + الحالة -->
+                <div class="stage-marker">
+                    {% if item.is_completed %}
+                        <i class="fas fa-check"></i>
+                    {% elif not item.is_unlocked %}
+                        <i class="fas fa-lock"></i>
+                    {% else %}
+                        <span>{{ item.stage.stage_number }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- محتوى المرحلة -->
+                <div class="stage-content">
+                    <div class="stage-header">
+                        <h3>{{ item.stage.title }}</h3>
+                        
+                        {% if item.is_completed %}
+                            <span class="badge badge-success">✅ مكتمل</span>
+                        {% elif item.is_current %}
+                            <span class="badge badge-current">🔥 حالياً</span>
+                        {% elif not item.is_unlocked %}
+                            <span class="badge badge-locked">🔒 مقفلة</span>
+                        {% else %}
+                            <span class="badge badge-open">✨ متاحة</span>
+                        {% endif %}
+                    </div>
+                    
+                    <p class="stage-desc">{{ item.stage.description }}</p>
+
+                    <!-- أزرار الإجراءات -->
+                    <div class="stage-actions">
+                        {% if item.is_completed or item.is_unlocked %}
+                        <a href="{{ url_for('university.stage_detail', stage_id=item.stage.id) }}" 
+                           class="btn btn-primary btn-sm">
+                            {% if item.is_completed %}
+                                <i class="fas fa-redo"></i> إعادة المراجعة
+                            {% else %}
+                                <i class="fas fa-play"></i> ابدأ المرحلة
+                            {% endif %}
+                        </a>
+                        {% else %}
+                        <button class="btn btn-outline btn-sm" disabled>
+                            <i class="fas fa-lock"></i> مقفلة
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</div>
+
+<style>
+    .uni-path-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* رأس المسار */
+    .path-header-card {
+        background: var(--bg-card);
+        border: 2px solid var(--accent);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        margin-bottom: 40px;
+        box-shadow: var(--shadow-md);
+    }
+    .path-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+    .path-header-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex: 1;
+    }
+    .path-header-icon {
+        font-size: 3.5rem;
+    }
+    .path-header-info h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+    .path-header-info p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+    .path-header-stats {
+        display: flex;
+        gap: 20px;
+    }
+    .mini-stat {
+        text-align: center;
+        padding: 12px 18px;
+        background: var(--bg-elevated);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+    }
+    .mini-stat-num {
+        display: block;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+    .mini-stat-label {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+    .total-progress-bar {
+        background: var(--bg-elevated);
+        border-radius: 20px;
+        height: 16px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        margin-bottom: 8px;
+    }
+    .total-progress-fill {
+        height: 100%;
+        width: 0%;
+        background-color: var(--accent);
+        border-radius: 20px;
+        transition: width 0.8s ease;
+    }
+    .progress-label {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        text-align: left;
+    }
+
+    .section-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 24px;
+    }
+
+    /* Timeline */
+    .stages-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .stage-item {
+        display: flex;
+        gap: 20px;
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        transition: all var(--transition);
+    }
+    .stage-item:hover:not(.locked) {
+        border-color: var(--accent);
+        transform: translateX(-4px);
+        box-shadow: var(--shadow-md);
+    }
+    .stage-item.completed {
+        border-color: var(--accent);
+        background: var(--accent-light);
+    }
+    .stage-item.current {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-light);
+    }
+    .stage-item.locked {
+        opacity: 0.6;
+        background: var(--bg-elevated);
+    }
+
+    .stage-marker {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--bg-elevated);
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }
+    .stage-item.completed .stage-marker {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+    .stage-item.current .stage-marker {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { box-shadow: 0 0 0 0 var(--accent-light); }
+        50% { box-shadow: 0 0 0 8px transparent; }
+    }
+
+    .stage-content {
+        flex: 1;
+    }
+    .stage-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+        flex-wrap: wrap;
+    }
+    .stage-header h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+    }
+    .stage-desc {
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+        line-height: 1.6;
+    }
+    .badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .badge-success {
+        background: var(--accent);
+        color: white;
+    }
+    .badge-current {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #f59e0b;
+    }
+    .badge-locked {
+        background: var(--bg-elevated);
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+    }
+    .badge-open {
+        background: var(--accent-light);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+    }
+    .stage-actions .btn-sm {
+        padding: 10px 20px;
+        font-size: 0.95rem;
+    }
+    .stage-actions .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 600px) {
+        .path-header-top {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .path-header-stats {
+            width: 100%;
+            justify-content: space-between;
+        }
+        .mini-stat {
+            flex: 1;
+            padding: 10px;
+        }
+        .stage-item {
+            flex-direction: column;
+            gap: 12px;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.total-progress-fill').forEach(function(bar) {
+            const width = bar.getAttribute('data-width');
+            if (width) {
+                setTimeout(function() {
+                    bar.style.width = width + '%';
+                }, 100);
+            }
+        });
+    });
+</script>
+{% endblock %}

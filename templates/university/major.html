@@ -1,0 +1,271 @@
+<!-- templates/university/major.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ major_info.name }} - المسارات المهنية{% endblock %}
+
+{% block help_title %}مسارات {{ major_info.name }}{% endblock %}
+{% block help_content %}اختر المسار المهني الذي تريد تعلمه من الصفر إلى الاحتراف.{% endblock %}
+{% block help_step %}اقرأ الملخص، ثم اضغط "ابدأ المسار".{% endblock %}
+
+{% block content %}
+<div class="uni-major-container">
+    
+    <!-- رأس الصفحة -->
+    <header class="major-header">
+        <div class="major-icon-big">{{ major_info.icon }}</div>
+        <h1>{{ major_info.name }}</h1>
+        <p>اختر المسار المهني الذي يناسبك. كل مسار يأخذك من الصفر إلى الاحتراف.</p>
+    </header>
+        <!-- زر العودة للداش بورد -->
+    <div style="text-align: center; margin-bottom: 24px;">
+        <a href="{{ url_for('university.dashboard') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-right"></i> العودة للداش بورد
+        </a>
+    </div>
+    <!-- المسارات -->
+    <section>
+        <h2 class="section-title">🎯 المسارات المتاحة</h2>
+        
+        {% if paths_with_status %}
+        <div class="paths-list">
+            {% for item in paths_with_status %}
+            <div class="path-card {% if item.is_completed %}completed{% endif %}">
+                
+                <!-- رأس البطاقة -->
+                <div class="path-header">
+                    <div class="path-title-section">
+                        <span class="path-icon">{{ item.path.icon }}</span>
+                        <div>
+                            <h3>{{ item.path.title }}</h3>
+                            <div class="path-meta">
+                                <span>📊 {{ item.path.difficulty }}</span>
+                                <span>⏱️ {{ item.path.estimated_hours }} ساعة</span>
+                                <span>📚 {{ item.path.total_stages }} مراحل</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% if item.is_completed %}
+                    <span class="completed-badge">✅ مكتمل</span>
+                    {% elif item.is_started %}
+                    <span class="in-progress-badge">🔄 {{ item.percentage }}%</span>
+                    {% endif %}
+                </div>
+
+                <!-- الوصف -->
+                <p class="path-description">{{ item.path.description }}</p>
+
+                <!-- شريط التقدم (إذا بدأ) -->
+                {% if item.is_started %}
+                <div class="path-progress-wrapper">
+                    <div class="path-progress-bar">
+                        <div class="path-progress-fill" data-width="{{ item.percentage }}"></div>
+                    </div>
+                    <div class="path-progress-text">{{ item.percentage }}% مكتمل</div>
+                </div>
+                {% endif %}
+
+                <!-- زر البدء -->
+                <div class="path-actions">
+                    {% if item.is_started %}
+                    <a href="{{ url_for('university.career_path', path_slug=item.path.slug) }}" 
+                       class="btn btn-primary">
+                        <i class="fas fa-play"></i> متابعة المسار
+                    </a>
+                    {% else %}
+                    <form method="POST" action="{{ url_for('university.start_career', path_id=item.path.id) }}" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-rocket"></i> ابدأ المسار
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-road" style="font-size: 3rem; color: var(--text-secondary);"></i>
+            <p>لا توجد مسارات متاحة لهذا التخصص حالياً.</p>
+            <a href="{{ url_for('university.dashboard') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-right"></i> العودة للداش بورد
+            </a>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- العودة -->
+    <div style="text-align: center; margin-top: 40px;">
+        <a href="{{ url_for('university.dashboard') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-right"></i> العودة للداش بورد
+        </a>
+    </div>
+
+</div>
+
+<style>
+    .uni-major-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* رأس الصفحة */
+    .major-header {
+        text-align: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 40px 24px;
+        margin-bottom: 32px;
+        box-shadow: var(--shadow-sm);
+    }
+    .major-icon-big {
+        font-size: 4rem;
+        margin-bottom: 12px;
+    }
+    .major-header h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .major-header p {
+        color: var(--text-secondary);
+        font-size: 1.15rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .section-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 24px;
+        color: var(--text-primary);
+    }
+
+    /* قائمة المسارات */
+    .paths-list {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+    }
+    .path-card {
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+        transition: all var(--transition);
+    }
+    .path-card:hover {
+        border-color: var(--accent);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+    .path-card.completed {
+        border-color: var(--accent);
+        background: var(--accent-light);
+    }
+
+    .path-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .path-title-section {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex: 1;
+    }
+    .path-icon {
+        font-size: 3rem;
+        flex-shrink: 0;
+    }
+    .path-title-section h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .path-meta {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+    .completed-badge, .in-progress-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+    .completed-badge {
+        background: var(--accent);
+        color: white;
+    }
+    .in-progress-badge {
+        background: var(--accent-light);
+        color: var(--accent);
+        border: 1px solid var(--accent);
+    }
+
+    .path-description {
+        color: var(--text-secondary);
+        line-height: 1.7;
+        margin-bottom: 20px;
+        font-size: 1.05rem;
+    }
+
+    /* شريط التقدم */
+    .path-progress-wrapper {
+        margin-bottom: 20px;
+    }
+    .path-progress-bar {
+        background: var(--bg-elevated);
+        border-radius: 20px;
+        height: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        margin-bottom: 6px;
+    }
+    .path-progress-fill {
+        height: 100%;
+        width: 0%;
+        background-color: var(--accent);
+        border-radius: 20px;
+        transition: width 0.8s ease;
+    }
+    .path-progress-text {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        text-align: left;
+    }
+
+    /* الأزرار */
+    .path-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .path-actions .btn {
+        padding: 14px 32px;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.path-progress-fill').forEach(function(bar) {
+            const width = bar.getAttribute('data-width');
+            if (width) {
+                setTimeout(function() {
+                    bar.style.width = width + '%';
+                }, 100);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,134 @@
+<!-- templates/university/base_university.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="uni-main-container">
+
+    <!-- Tabs الرئيسية -->
+    <div class="uni-main-tabs">
+        <a href="{{ url_for('university.setup') }}" 
+           class="uni-main-tab {% if current_tab == 'home' %}active{% endif %}">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="{{ url_for('university.dashboard') }}" 
+           class="uni-main-tab {% if current_tab == 'dashboard' %}active{% endif %}">
+            <i class="fas fa-chart-line"></i>
+            <span>Dashboard</span>
+        </a>
+        <button type="button" 
+                class="uni-main-tab uni-main-tab-secondary"
+                onclick="confirmBackToHighSchool(event)">
+            <i class="fas fa-exchange-alt"></i>
+            <span>الثانوية</span>
+        </button>
+    </div>
+
+    <!-- محتوى الصفحة -->
+    <div class="uni-content-area">
+        {% block university_content %}{% endblock %}
+    </div>
+
+</div>
+
+<style>
+    .uni-main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    /* Tabs الرئيسية */
+    .uni-main-tabs {
+        display: flex;
+        gap: 8px;
+        padding: 8px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-sm);
+    }
+    .uni-main-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 24px;
+        border-radius: var(--radius);
+        text-decoration: none;
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 1.05rem;
+        transition: all 0.2s ease;
+        flex: 1;
+        justify-content: center;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .uni-main-tab i {
+        font-size: 1.2rem;
+    }
+    .uni-main-tab:hover {
+        background: var(--bg-elevated);
+        color: var(--text-primary);
+    }
+    .uni-main-tab.active {
+        background: var(--accent);
+        color: white;
+        box-shadow: var(--shadow-sm);
+    }
+    .uni-main-tab-secondary {
+        margin-inline-start: auto;
+        border: 2px solid var(--accent) !important;
+        color: var(--accent);
+        flex: 0 0 auto;
+    }
+    .uni-main-tab-secondary:hover {
+        background: var(--accent);
+        color: white;
+    }
+
+    .uni-content-area {
+        min-height: 400px;
+    }
+
+    @media (max-width: 768px) {
+        .uni-main-tab {
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .uni-main-tab i { font-size: 1.3rem; }
+        .uni-main-tab span { font-size: 0.8rem; }
+        .uni-main-tab-secondary { flex: 0 0 auto; }
+    }
+</style>
+
+<script>
+    window.confirmBackToHighSchool = function(event) {
+        if (event) event.preventDefault();
+        if (typeof showGlobalConfirm === 'function') {
+            showGlobalConfirm({
+                icon: '🎓',
+                title: 'العودة لمسار الثانوية',
+                message: 'هل تريد العودة لمسار الطالب الثانوي؟\nجميع بياناتك محفوظة.',
+                confirmText: 'نعم، عُد للثانوية',
+                cancelText: 'إلغاء الأمر',
+                danger: false,
+                onConfirm: function() {
+                    window.location.href = '{{ url_for("main.switch_to", target_type="high_school") }}';
+                }
+            });
+        } else {
+            // fallback في حال لم يتم تحميل الـModal بعد
+            if (window.confirm('هل تريد العودة لمسار الطالب الثانوي؟ جميع بياناتك محفوظة.')) {
+                window.location.href = '{{ url_for("main.switch_to", target_type="high_school") }}';
+            }
+        }
+        return false;
+    };
+</script>
+{% endblock %}

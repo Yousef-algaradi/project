@@ -1,0 +1,475 @@
+<!-- templates/university/quiz.html -->
+{% extends "base.html" %}
+
+{% block title %}اختبار {{ stage.title }}{% endblock %}
+
+{% block help_title %}اختبار المرحلة {{ stage.stage_number }}{% endblock %}
+{% block help_content %}أجب على السؤال المعروض. يمكنك تخطي السؤال (يُحسب خطأ).{% endblock %}
+{% block help_step %}اختر إجابة أو تخطَّ السؤال.{% endblock %}
+
+{% block content %}
+<div class="uni-quiz-container">
+
+    <header class="quiz-header">
+        <div class="quiz-header-info">
+            <span class="quiz-icon">📝</span>
+            <div>
+                <h1>{{ stage.title }}</h1>
+                <p>المرحلة {{ stage.stage_number }} من {{ career_path.total_stages }}</p>
+            </div>
+        </div>
+        <div class="quiz-score-preview">
+            <span id="answeredCount">0</span> / <span id="totalQuestions">{{ quiz_data|length }}</span>
+            <small>تم الإجابة</small>
+        </div>
+    </header>
+
+    <div class="quiz-progress-container">
+        <div class="quiz-progress-bar" id="quizProgressBar"></div>
+    </div>
+
+    <form id="quizForm" method="POST" data-action="{{ url_for('university.quiz_submit', stage_id=stage.id) }}"
+        data-total="{{ quiz_data|length }}">
+
+        <div class="questions-list">
+            {% for q in quiz_data %}
+            <div class="question-card" data-qid="{{ q.id }}" data-index="{{ loop.index0 }}"
+                data-visible="{{ 'true' if loop.first else 'false' }}">
+
+                <div class="question-header">
+                    <div class="q-number">سؤال {{ loop.index }} من {{ quiz_data|length }}</div>
+                    <button type="button" class="btn-skip-q" data-skip-index="{{ loop.index0 }}">
+                        <i class="fas fa-forward"></i> تخطي
+                    </button>
+                </div>
+
+                <div class="q-difficulty difficulty-{{ q.difficulty }}">
+                    {% if q.difficulty == 'easy' %}سهل
+                    {% elif q.difficulty == 'medium' %}متوسط
+                    {% else %}صعب{% endif %}
+                </div>
+
+                <h3 class="question-text">{{ q.text }}</h3>
+
+                <div class="options-list">
+                    {% for key, text in q.options.items() %}
+                    <label class="option-item" data-qid="{{ q.id }}" data-answer="{{ key }}">
+                        <input type="radio" name="question_{{ q.id }}" value="{{ key }}" class="hidden-radio">
+                        <span class="option-letter">{{ key }}</span>
+                        <span class="option-text">{{ text }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="quiz-submit-section" id="submitSection" style="display: none;">
+            <div class="submit-info">
+                <p>✅ أكملت جميع الأسئلة!</p>
+                <p>النتيجة المطلوبة: <strong>7 من 10</strong></p>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane"></i> إرسال الإجابات
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<style>
+    .uni-quiz-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
+
+    .quiz-header {
+        background: var(--bg-card);
+        border: 2px solid var(--accent);
+        border-radius: var(--radius-lg);
+        padding: 24px 32px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        box-shadow: var(--shadow-md);
+    }
+
+    .quiz-header-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .quiz-icon {
+        font-size: 2.5rem;
+    }
+
+    .quiz-header-info h1 {
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .quiz-header-info p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .quiz-score-preview {
+        text-align: center;
+        background: var(--accent-light);
+        padding: 12px 24px;
+        border-radius: var(--radius);
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .quiz-score-preview small {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-top: 4px;
+    }
+
+    .quiz-progress-container {
+        background: var(--bg-elevated);
+        border-radius: 20px;
+        height: 12px;
+        margin-bottom: 32px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+    }
+
+    .quiz-progress-bar {
+        height: 100%;
+        width: 0%;
+        background-color: var(--accent);
+        border-radius: 20px;
+        transition: width 0.4s ease;
+    }
+
+    .questions-list {
+        min-height: 400px;
+    }
+
+    /* ✅ السؤال: مخفي افتراضياً، يظهر عند data-visible="true" */
+    .question-card {
+        display: none;
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 36px;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .question-card[data-visible="true"] {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .q-number {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .btn-skip-q {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 18px;
+        background: transparent;
+        border: 2px solid var(--danger);
+        color: var(--danger);
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 0.95rem;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .btn-skip-q:hover {
+        background: var(--danger);
+        color: white;
+    }
+
+    .q-difficulty {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .difficulty-easy {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .difficulty-medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .difficulty-hard {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .question-text {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 28px;
+        line-height: 1.6;
+    }
+
+    .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .option-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 24px;
+        background: var(--bg-elevated);
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 1.15rem;
+    }
+
+    .option-item:hover {
+        border-color: var(--accent);
+        background: var(--surface-hover);
+        transform: translateX(-4px);
+    }
+
+    .option-item.selected {
+        border-color: var(--accent);
+        background: var(--accent-light);
+    }
+
+    .hidden-radio {
+        display: none;
+    }
+
+    .option-letter {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--bg-card);
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.05rem;
+        flex-shrink: 0;
+    }
+
+    .option-item.selected .option-letter {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+
+    .option-text {
+        font-size: 1.15rem;
+        line-height: 1.5;
+    }
+
+    .quiz-submit-section {
+        margin-top: 40px;
+        text-align: center;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 32px;
+    }
+
+    .submit-info {
+        margin-bottom: 20px;
+    }
+
+    .submit-info p {
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        font-size: 1.05rem;
+    }
+
+    .btn-lg {
+        padding: 18px 60px;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+</style>
+
+<script>
+(function() {
+    const form = document.getElementById('quizForm');
+    if (!form) return;
+    
+    const totalQuestions = parseInt(form.getAttribute('data-total')) || 0;
+    const formAction = form.getAttribute('data-action');
+    const answeredCountEl = document.getElementById('answeredCount');
+    const progressBar = document.getElementById('quizProgressBar');
+    const submitSection = document.getElementById('submitSection');
+
+    form.setAttribute('action', formAction);
+
+    const state = {
+        currentIndex: 0,
+        answered: new Set(),
+        skipped: new Set()
+    };
+
+    function getTotalCompleted() {
+        return state.answered.size + state.skipped.size;
+    }
+
+    function updateProgress() {
+        const completed = getTotalCompleted();
+        const percentage = totalQuestions > 0 ? (completed / totalQuestions) * 100 : 0;
+        if (progressBar) progressBar.style.width = percentage + '%';
+        if (answeredCountEl) answeredCountEl.textContent = completed;
+    }
+
+    function showQuestion(index) {
+        document.querySelectorAll('.question-card').forEach(function(card) {
+            card.setAttribute('data-visible', 'false');
+        });
+
+        const card = document.querySelector('.question-card[data-index="' + index + '"]');
+        if (card) {
+            card.setAttribute('data-visible', 'true');
+        }
+        state.currentIndex = index;
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function findNextUnansweredIndex() {
+        for (let i = state.currentIndex + 1; i < totalQuestions; i++) {
+            const card = document.querySelector('.question-card[data-index="' + i + '"]');
+            if (card) {
+                const qid = card.getAttribute('data-qid');
+                if (!state.answered.has(qid) && !state.skipped.has(qid)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+    function goToNext() {
+        const nextIndex = findNextUnansweredIndex();
+        
+        if (nextIndex === -1) {
+            document.querySelectorAll('.question-card').forEach(function(card) {
+                card.setAttribute('data-visible', 'false');
+            });
+            if (submitSection) {
+                submitSection.style.display = 'block';
+                submitSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
+
+        showQuestion(nextIndex);
+    }
+
+    // ✅ ربط الخيارات (مع منع النقر المزدوج)
+    document.querySelectorAll('.option-item').forEach(function(label) {
+        label.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const card = this.closest('.question-card');
+            const qid = this.getAttribute('data-qid');
+            const answer = this.getAttribute('data-answer');
+
+            // إذا كان مُجاباً → تجاهل
+            if (state.answered.has(qid)) return;
+
+            card.querySelectorAll('.option-item').forEach(function(item) {
+                item.classList.remove('selected');
+            });
+            this.classList.add('selected');
+
+            const radio = card.querySelector('input[name="question_' + qid + '"][value="' + answer + '"]');
+            if (radio) radio.checked = true;
+
+            state.answered.add(qid);
+            state.skipped.delete(qid);
+            updateProgress();
+
+            // ✅ تعطيل كل الخيارات في السؤال
+            card.querySelectorAll('.option-item').forEach(function(item) {
+                item.style.pointerEvents = 'none';
+            });
+
+            setTimeout(goToNext, 250);
+        });
+    });
+
+    // ربط أزرار التخطي
+    document.querySelectorAll('.btn-skip-q').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const cardIndex = parseInt(this.getAttribute('data-skip-index'));
+            const card = document.querySelector('.question-card[data-index="' + cardIndex + '"]');
+            if (!card) return;
+
+            const qid = card.getAttribute('data-qid');
+            
+            // إذا كان مُجاباً أو مُتخطى → تجاهل
+            if (state.answered.has(qid) || state.skipped.has(qid)) return;
+
+            state.skipped.add(qid);
+            state.answered.delete(qid);
+            updateProgress();
+            goToNext();
+        });
+    });
+
+    // ✅ بدء الاختبار
+    updateProgress();
+    showQuestion(0);
+})();
+</script>
+{% endblock %}
