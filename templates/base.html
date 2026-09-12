@@ -40,7 +40,9 @@
             color: var(--text, #1e293b);
         }
 
-        .logo-icon { font-size: 2.2rem; }
+        .logo-icon {
+            font-size: 2.2rem;
+        }
 
         .navbar-actions {
             display: flex;
@@ -72,7 +74,10 @@
             gap: 10px;
             transition: all 0.2s;
         }
-        .btn-outline:hover { background: #f1f5f9; }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+        }
 
         .icon-btn {
             font-size: 1.3rem !important;
@@ -87,13 +92,23 @@
             gap: 8px;
             transition: all 0.2s;
         }
-        .icon-btn i { font-size: 1.6rem; }
-        .icon-btn:hover { background: #f1f5f9; border-color: #e2e8f0; }
+
+        .icon-btn i {
+            font-size: 1.6rem;
+        }
+
+        .icon-btn:hover {
+            background: #f1f5f9;
+            border-color: #e2e8f0;
+        }
 
         /* ==========================================
            قائمة "حساباتي"
            ========================================== */
-        .account-menu { position: relative; display: inline-block; }
+        .account-menu {
+            position: relative;
+            display: inline-block;
+        }
 
         .dropdown-content {
             display: none;
@@ -112,11 +127,23 @@
             overflow: hidden;
             animation: dropdownFadeIn 0.15s ease;
         }
-        .dropdown-content.show { display: block; }
-        @keyframes dropdownFadeIn {
-            from { opacity: 0; transform: translateY(-6px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .dropdown-content.show {
+            display: block;
         }
+
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .dropdown-content a {
             display: flex;
             align-items: center;
@@ -130,10 +157,12 @@
             white-space: nowrap;
             transition: background 0.15s, color 0.15s;
         }
+
         .dropdown-content a:hover {
             background: var(--accent-light, #eef2ff);
             color: var(--accent, #4f46e5);
         }
+
         .dropdown-content a i {
             font-size: 1.1rem;
             width: 20px;
@@ -141,15 +170,29 @@
             color: var(--accent, #4f46e5);
             flex-shrink: 0;
         }
-        .dropdown-content a span { flex: 1; }
+
+        .dropdown-content a span {
+            flex: 1;
+        }
+
         .dropdown-content .divider {
             height: 1px;
             background: var(--border-color, #e2e8f0);
             margin: 6px 8px;
         }
-        .dropdown-content a.logout-link { color: #dc2626; }
-        .dropdown-content a.logout-link i { color: #dc2626; }
-        .dropdown-content a.logout-link:hover { background: #fee2e2; color: #b91c1c; }
+
+        .dropdown-content a.logout-link {
+            color: #dc2626;
+        }
+
+        .dropdown-content a.logout-link i {
+            color: #dc2626;
+        }
+
+        .dropdown-content a.logout-link:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
 
         /* ==========================================
            Global Confirm Modal (نسخة واحدة نهائية)
@@ -165,8 +208,20 @@
             padding: 20px;
             animation: gcmFadeIn 0.2s ease;
         }
-        .gcm-overlay.show { display: flex; }
-        @keyframes gcmFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .gcm-overlay.show {
+            display: flex;
+        }
+
+        @keyframes gcmFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
 
         .gcm-box {
             background: var(--bg-card, #fff);
@@ -179,12 +234,24 @@
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
             animation: gcmBoxIn 0.25s ease;
         }
+
         @keyframes gcmBoxIn {
-            from { opacity: 0; transform: scale(0.92); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.92);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
-        .gcm-icon { font-size: 3.5rem; margin-bottom: 16px; line-height: 1; }
+        .gcm-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            line-height: 1;
+        }
 
         .gcm-title {
             font-size: 1.4rem;
@@ -201,7 +268,11 @@
             white-space: pre-line;
         }
 
-        .gcm-actions { display: flex; flex-direction: column; gap: 12px; }
+        .gcm-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
         .gcm-btn {
             width: 100%;
@@ -218,29 +289,65 @@
             font-family: inherit;
             transition: all 0.2s ease;
         }
-        .gcm-btn-confirm { background: #10b981; color: #ffffff; }
-        .gcm-btn-confirm:hover { background: #059669; }
-        .gcm-btn-confirm.danger { background: #dc2626; }
-        .gcm-btn-confirm.danger:hover { background: #b91c1c; }
+
+        .gcm-btn-confirm {
+            background: #10b981;
+            color: #ffffff;
+        }
+
+        .gcm-btn-confirm:hover {
+            background: #059669;
+        }
+
+        .gcm-btn-confirm.danger {
+            background: #dc2626;
+        }
+
+        .gcm-btn-confirm.danger:hover {
+            background: #b91c1c;
+        }
 
         .gcm-btn-cancel {
             background: transparent;
             color: var(--text-primary, #1e293b);
             border: 1px solid var(--border-color, #e2e8f0);
         }
-        .gcm-btn-cancel:hover { background: var(--bg-elevated, #f1f5f9); }
 
-        [data-theme="dark"] .gcm-box { background: #1e293b; border-color: #334155; }
-        [data-theme="dark"] .gcm-title { color: #f1f5f9; }
-        [data-theme="dark"] .gcm-message { color: #cbd5e1; }
-        [data-theme="dark"] .gcm-btn-cancel { color: #f1f5f9; border-color: #334155; }
-        [data-theme="dark"] .gcm-btn-cancel:hover { background: #273449; }
+        .gcm-btn-cancel:hover {
+            background: var(--bg-elevated, #f1f5f9);
+        }
+
+        [data-theme="dark"] .gcm-box {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        [data-theme="dark"] .gcm-title {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .gcm-message {
+            color: #cbd5e1;
+        }
+
+        [data-theme="dark"] .gcm-btn-cancel {
+            color: #f1f5f9;
+            border-color: #334155;
+        }
+
+        [data-theme="dark"] .gcm-btn-cancel:hover {
+            background: #273449;
+        }
 
         /* ==========================================
            MOBILE
            ========================================== */
         @media (max-width: 768px) {
-            .mobile-menu-toggle { display: inline-flex; align-items: center; }
+            .mobile-menu-toggle {
+                display: inline-flex;
+                align-items: center;
+            }
+
             .navbar-actions {
                 position: absolute;
                 top: 80px;
@@ -255,12 +362,22 @@
                 z-index: 1000;
                 gap: 15px;
             }
-            .navbar-actions.active { display: flex; }
-            .btn-outline { font-size: 1.1rem; padding: 10px 20px; }
+
+            .navbar-actions.active {
+                display: flex;
+            }
+
+            .btn-outline {
+                font-size: 1.1rem;
+                padding: 10px 20px;
+            }
         }
 
         @media (max-width: 600px) {
-            .account-menu { position: static; }
+            .account-menu {
+                position: static;
+            }
+
             .dropdown-content {
                 position: fixed;
                 top: 90px;
@@ -268,6 +385,47 @@
                 max-width: none;
                 width: auto;
             }
+        }
+
+        .dropdown-content button.logout-link-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            color: #dc2626;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: background 0.15s, color 0.15s;
+            background: none;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-family: inherit;
+            text-align: start;
+        }
+
+        .dropdown-content button.logout-link-btn i {
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+            color: #dc2626;
+            flex-shrink: 0;
+        }
+
+        .dropdown-content button.logout-link-btn span {
+            flex: 1;
+        }
+
+        .dropdown-content button.logout-link-btn:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .dropdown-content button.logout-link-btn:hover i {
+            color: #b91c1c;
         }
     </style>
 </head>
@@ -315,11 +473,13 @@
                             <span>بياناتي</span>
                         </a>
                         <div class="divider"></div>
-                        <a href="{{ url_for('auth.logout') }}" class="logout-link" role="menuitem"
-                            onclick="return confirmLogout(event);">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>تسجيل خروج</span>
-                        </a>
+                        <form method="POST" action="{{ url_for('auth.logout') }}" style="display: contents;">
+                            <button type="submit" class="logout-link-btn" role="menuitem"
+                                onclick="return confirmLogout(event);">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>تسجيل خروج</span>
+                            </button>
+                        </form>
                     </div>
                 </div>
                 {% endif %}
@@ -482,6 +642,7 @@
         // ==========================================
         window.confirmLogout = function (event) {
             if (event) event.preventDefault();
+            const form = event && event.target ? event.target.closest('form') : null;
             window.showGlobalConfirm({
                 icon: '👋',
                 title: 'تسجيل الخروج',
@@ -490,7 +651,7 @@
                 cancelText: 'إلغاء الأمر',
                 danger: false,
                 onConfirm: function () {
-                    window.location.href = '{{ url_for("auth.logout") }}';
+                    if (form) form.submit();
                 }
             });
             return false;

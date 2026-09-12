@@ -9,6 +9,11 @@
 
 {% block university_content %}
 
+<!-- CSRF Token (إن وُجد) -->
+{% if csrf_token is defined %}
+<input type="hidden" name="csrf_token" id="globalCsrfToken" value="{{ csrf_token() }}">
+{% endif %}
+
 <!-- Tabs الفرعية (المسارات) -->
 {% if progress_list %}
 <div class="track-tabs">
@@ -65,7 +70,6 @@
 <section style="margin-bottom: 40px;">
     <h2 style="font-size: 1.6rem; margin-bottom: 20px;">📌 المسار الحالي</h2>
     <div class="current-path-card">
-        <!-- ✅ زر X لحذف المسار -->
         <button type="button" 
                 class="track-delete-btn"
                 aria-label="حذف المسار"
@@ -107,7 +111,6 @@
     <div class="paths-grid">
         {% for p in progress_list %}
         <div class="path-mini-card {% if p.is_completed %}completed{% endif %}">
-            <!-- ✅ زر X للحذف -->
             <button type="button" 
                     class="track-delete-btn"
                     aria-label="حذف المسار"
@@ -389,43 +392,58 @@
     });
 
     // ==========================================
-    // حذف المسار
+    // حذف المسار — نسخة نهائية
     // ==========================================
     window.deletePath = function(event, slug, title) {
-        if (event) event.preventDefault();
-        
-        if (typeof showConfirmModal === 'function') {
-            showConfirmModal({
-                icon: '🗑️',
-                title: 'حذف المسار',
-                message: 'هل أنت متأكد من حذف مسار "' + title + '"؟\nسيتم حذف تقدمك و XP في هذا المسار فقط.',
-                confirmText: 'نعم، احذف المسار',
-                cancelText: 'إلغاء الأمر',
-                danger: true,
-                onConfirm: function() {
-                    var form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = '/university/career/' + slug + '/delete';
-                    
-                    var csrfInput = document.querySelector('input[name="csrf_token"]');
-                    if (csrfInput) {
-                        var csrfClone = document.createElement('input');
-                        csrfClone.type = 'hidden';
-                        csrfClone.name = 'csrf_token';
-                        csrfClone.value = csrfInput.value;
-                        form.appendChild(csrfClone);
-                    }
-                    
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        } else {
-            if (window.confirm('هل أنت متأكد من حذف مسار "' + title + '"؟')) {
-                window.location.href = '/university/career/' + slug + '/delete';
-            }
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
         }
+        
+        // ✅ استخدام showGlobalConfirm من base.html
+        if (typeof window.showGlobalConfirm !== 'function') {
+            console.error('❌ showGlobalConfirm غير معرفة في base.html');
+            // fallback بسيط
+            if (window.confirm('هل أنت متأكد من حذف مسار "' + title + '"؟')) {
+                submitDeleteForm(slug);
+            }
+            return false;
+        }
+        
+        window.showGlobalConfirm({
+            icon: '🗑️',
+            title: 'حذف المسار',
+            message: 'هل أنت متأكد من حذف مسار "' + title + '"؟\nسيتم حذف تقدمك و XP في هذا المسار فقط.',
+            confirmText: 'نعم، احذف المسار',
+            cancelText: 'إلغاء الأمر',
+            danger: true,
+            onConfirm: function() {
+                submitDeleteForm(slug);
+            }
+        });
+        
         return false;
     };
+
+    // ✅ دالة مساعدة لإرسال POST
+    function submitDeleteForm(slug) {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/university/career/' + encodeURIComponent(slug) + '/delete';
+        form.style.display = 'none';
+        
+        // CSRF token إذا موجود
+        var csrfInput = document.getElementById('globalCsrfToken');
+        if (csrfInput && csrfInput.value) {
+            var clone = document.createElement('input');
+            clone.type = 'hidden';
+            clone.name = 'csrf_token';
+            clone.value = csrfInput.value;
+            form.appendChild(clone);
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
 </script>
 {% endblock %}

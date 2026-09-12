@@ -97,12 +97,12 @@ def submit_assessment():
     if user.high_school_profile and user.high_school_profile.branch:
         branch = user.high_school_profile.branch
     subject_scores = AssessmentEngine.calculate_subject_scores(subject_answers, branch)
-
+    #هل عمل الاختبار او لا 
     result = AssessmentResult.query.filter_by(user_id=user_id).first()
     if not result:
         result = AssessmentResult(user_id=user_id)
         db.session.add(result)
-
+    # حفظ النتائج
     result.aptitude_answers = json.dumps(aptitude_answers, ensure_ascii=False)
     result.aptitude_scores = json.dumps(aptitude_scores, ensure_ascii=False)
     result.subject_answers = json.dumps(subject_answers, ensure_ascii=False)
@@ -126,6 +126,7 @@ def profile():
     subject_grades = {}
     selected_interests = []
     if user.high_school_profile:
+        #تحويل من قاعده البيانات ل جيسون 
         if user.high_school_profile.subject_grades:
             try:
                 subject_grades = json.loads(user.high_school_profile.subject_grades)
@@ -154,7 +155,7 @@ def profile():
                            assessment_completed=assessment_completed,
                            branch_data=BRANCH_DATA)
 
-
+                            #حفظ الملف الاكاديمي        
 @student_bp.route('/profile', methods=['POST'])
 @login_required
 def update_profile():
@@ -163,7 +164,7 @@ def update_profile():
     
     branch = request.form.get('branch', 'علمي')
     overall = request.form.get('overall_percentage', type=float)
-    
+    #جمع الدرجاات 
     grades_dict = {}
     if branch in BRANCH_DATA:
         for sub in BRANCH_DATA[branch]['subjects']:
@@ -173,16 +174,16 @@ def update_profile():
                 grades_dict[key] = value
     
     subject_grades_json = json.dumps(grades_dict, ensure_ascii=False)
-    
+    #جمع الاهتماامات 
     interests_list = request.form.getlist('interests')
     interests_text = '، '.join(interests_list) if interests_list else ''
-    
+    #جلب او انشاء ملف ثانوية 
     if not user.high_school_profile:
         hs_profile = HighSchoolProfile(user_id=user_id)
         db.session.add(hs_profile)
     else:
         hs_profile = user.high_school_profile
-    
+    #حفظ البيانات 
     hs_profile.branch = branch
     hs_profile.overall_percentage = overall
     hs_profile.subject_grades = subject_grades_json
@@ -210,14 +211,14 @@ def analyze():
     if not user.high_school_profile:
         flash('يرجى إدخال بيانات الثانوية أولاً', 'warning')
         return redirect(url_for('student.profile'))
-    
+    #جلب نتائج الاختبار ان وجدت 
     assessment_result = AssessmentResult.query.filter_by(user_id=user_id).first()
     assessment_scores = {}
     subject_test_scores = {}
     if assessment_result:
         assessment_scores = assessment_result.get_aptitude_scores()
         subject_test_scores = assessment_result.get_subject_scores()
-    
+    #ياخذ المطلوب الاسم والدرجاات ... ويرجع التوصيات 
     recommendations = AnalysisEngine.analyze_student(
         user_id, 
         user.high_school_profile, 
@@ -228,9 +229,10 @@ def analyze():
     if not recommendations:
         flash('لا توجد توصيات مناسبة بناءً على بياناتك الحالية', 'info')
         return redirect(url_for('dashboard.home'))
-    
+    #حذف التوصيات القديمه 
     Recommendation.query.filter_by(user_id=user_id).delete()
-    
+
+    #حفظ التوصيات 
     for rec in recommendations:
         new_rec = Recommendation(
     user_id=user_id,
@@ -246,6 +248,7 @@ def analyze():
     
     flash('تم تحليل بياناتك وإنشاء التوصيات بنجاح!', 'success')
     return redirect(url_for('dashboard.home', tab='recommendations'))
+
 # ========== البدء من جديد (حذف كل شيء) ==========
 @student_bp.route('/reset-all')
 @login_required

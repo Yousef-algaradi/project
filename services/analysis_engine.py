@@ -412,13 +412,13 @@ class AnalysisEngine:
             ]
         }
     ]
-
+    #ترجمه اسماء المواد 
     SUBJECT_NAMES_AR = {
         'math': 'الرياضيات', 'physics': 'الفيزياء', 'chemistry': 'الكيمياء',
         'biology': 'الأحياء', 'english': 'الإنجليزية', 'arabic': 'العربية',
         'history': 'التاريخ', 'geography': 'الجغرافيا', 'islamic': 'التربية الإسلامية'
     }
-
+    #ترجمه ابعاد الميول 
     DIM_NAMES_AR = {
         'analytical': 'التحليل والمنطق',
         'problem_solving': 'حل المشكلات',
@@ -451,21 +451,21 @@ class AnalysisEngine:
     def analyze_student(user_id, hs_profile, assessment_scores=None, subject_test_scores=None):
         branch = hs_profile.branch or 'علمي'
         overall = hs_profile.overall_percentage if hs_profile.overall_percentage else 0.0
-
+    #استخراج الدرجات 
         grades = {}
         if hs_profile.subject_grades:
             try:
                 grades = json.loads(hs_profile.subject_grades)
             except:
                 grades = {}
-
+    #استخراج الاهتمامات 
         interests_list = []
         if hs_profile.interests:
             interests_list = re.split(r'[،,;\s]+', hs_profile.interests.strip())
             interests_list = [i.strip() for i in interests_list if i.strip()]
 
         recommendations = []
-
+    #كل قسم يمر ع 6 مراحل تصفيه 
         for major in AnalysisEngine.MAJORS_DB:
             # تصفية حسب القسم
             if major["branch"] != branch:
@@ -475,7 +475,9 @@ class AnalysisEngine:
             if overall < major["min_percentage"]:
                 continue
 
+
             # ========== 1. الأكاديمي (30%) ==========
+            #ضرب درجه الماده مع وزنهاا 
             subject_weights = major.get("subject_weights", {})
             weighted_sum = 0
             total_weight_used = 0
@@ -657,7 +659,7 @@ class AnalysisEngine:
                         break
 
             weaknesses_list = list(weaknesses_set)[:2]
-
+    #يخزن البيانات للتوصيه في جدول التوصيات  
             recommendations.append({
                 "major_title": major["title"],
                 "match_percentage": round(total_score, 2),

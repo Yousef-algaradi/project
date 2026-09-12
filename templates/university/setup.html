@@ -153,22 +153,59 @@
 </style>
 
 <script>
+   
     const MAJOR_TRACKS = {
     'data_science': [
-        { key: 'data-analyst', name: '📊 محلل بيانات', desc: '...' },
-        { key: 'data-scientist', name: '🤖 عالم بيانات', desc: '...' },
-        { key: 'data-engineer', name: '⚙️ مهندس بيانات', desc: '...' }
+        { 
+            key: 'data-analyst', 
+            name: '📊 محلل بيانات', 
+            desc: 'تحليل البيانات، Excel، SQL، Power BI، وتقديم رؤى قابلة للتنفيذ.' 
+        },
+        { 
+            key: 'data-scientist', 
+            name: '🤖 عالم بيانات', 
+            desc: 'الإحصاء، Python، Machine Learning، Deep Learning، وبناء نماذج تنبؤية.' 
+        },
+        { 
+            key: 'data-engineer', 
+            name: '⚙️ مهندس بيانات', 
+            desc: 'بناء Data Pipelines، Big Data، Apache Spark، Kafka، وCloud.' 
+        }
     ],
     'ai': [
-        { key: 'ml-engineer', name: '🤖 مهندس تعلم آلي', desc: '...' },
-        { key: 'cv-engineer', name: '👁️ مهندس رؤية حاسوبية', desc: '...' },
-        { key: 'nlp-engineer', name: '💬 مهندس NLP', desc: '...' }
+        { 
+            key: 'ml-engineer', 
+            name: '🤖 مهندس تعلم آلي', 
+            desc: 'تدريب النماذج، PyTorch، MLOps، Docker، ونشر الأنظمة الذكية.' 
+        },
+        { 
+            key: 'cv-engineer', 
+            name: '👁️ مهندس رؤية حاسوبية', 
+            desc: 'OpenCV، CNNs، Object Detection، YOLO، ومعالجة الصور والفيديو.' 
+        },
+        { 
+            key: 'nlp-engineer', 
+            name: '💬 مهندس NLP', 
+            desc: 'Transformers، LLMs، RAG، Fine-tuning، وتطبيقات اللغة الطبيعية.' 
+        }
     ],
     'cyber': [
-    { key: 'security-analyst', name: '🛡️ محلل أمن سيبراني', desc: 'تحليل التهديدات، مراقبة SOC، والاستجابة للحوادث.' },
-    { key: 'penetration-tester', name: '🔐 مختبر اختراق', desc: 'اختبار اختراق تطبيقات الويب والشبكات وActive Directory.' },
-    { key: 'network-security-engineer', name: '🔒 مهندس أمن شبكات', desc: 'تصميم شبكات آمنة، جدران حماية، VPN، وأمن السحابة.' }
-]
+        { 
+            key: 'security-analyst', 
+            name: '🛡️ محلل أمن سيبراني', 
+            desc: 'تحليل التهديدات، مراقبة SOC، والاستجابة للحوادث.' 
+        },
+        { 
+            key: 'penetration-tester', 
+            name: '🔐 مختبر اختراق', 
+            desc: 'اختبار اختراق تطبيقات الويب والشبكات وActive Directory.' 
+        },
+        { 
+            key: 'network-security-engineer', 
+            name: '🔒 مهندس أمن شبكات', 
+            desc: 'تصميم شبكات آمنة، جدران حماية، VPN، وأمن السحابة.' 
+        }
+    ]
 };
 
     function selectMajor(majorKey) {

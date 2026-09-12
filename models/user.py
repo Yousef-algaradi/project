@@ -20,6 +20,7 @@ class User(db.Model):
     # العلاقة (one-to-one) مع ملف الثانوية
     high_school_profile = db.relationship('HighSchoolProfile', backref='user', uselist=False, lazy=True)
 
+    #للتجميل الايميل
     def __repr__(self):
         return f'<User {self.email}>'
 
@@ -37,8 +38,11 @@ class AssessmentResult(db.Model):
     
     completed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    #ربط النتيجه بالمستخدم 
     user = db.relationship('User', backref='assessment_result', uselist=False)
 
+    #تعمل ع اخذ النص من قاعده البيانات ويحوله ل 
+    #json
     def get_aptitude_scores(self):
         if self.aptitude_scores:
             try:
