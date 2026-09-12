@@ -80,7 +80,7 @@ class CareerStage(db.Model):
             except:
                 return []
         return []
-
+    # عرض رقم المرحله وعنوانها
     def __repr__(self):
         return f'<CareerStage {self.stage_number}: {self.title}>'
 
@@ -104,7 +104,7 @@ class QuizQuestion(db.Model):
             except:
                 return {}
         return {}
-
+    #عرض رقم السوال 
     def __repr__(self):
         return f'<QuizQuestion {self.id}>'
 
@@ -127,9 +127,10 @@ class CareerProgress(db.Model):
     is_completed = db.Column(db.Boolean, default=False)        # اكتمل المسار
     completed_at = db.Column(db.DateTime)                       # تاريخ الإكمال
 
+    #علاقه المستخدم والمسار بالتقدم 
     user = db.relationship('User', backref='career_progress_entries')
     career_path = db.relationship('CareerPath', backref='progress_entries')
-
+    #ممنوع مستخدم يحمل صفين لنفس المسار 
     __table_args__ = (
         db.UniqueConstraint('user_id', 'career_path_id', name='unique_user_career'),
     )
@@ -159,5 +160,6 @@ class CareerProgress(db.Model):
         completed = len(self.get_completed_stages())
         return round((completed / self.career_path.total_stages) * 100, 1)
 
+    #يعرض رقم المستخدم ورقم المسار.
     def __repr__(self):
         return f'<CareerProgress User {self.user_id} - Path {self.career_path_id}>'

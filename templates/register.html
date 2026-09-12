@@ -5,8 +5,7 @@
 
 {% block help_title %}إنشاء حساب جديد{% endblock %}
 {% block help_content %}أدخل بياناتك لإنشاء حساب جديد والبدء في رحلتك الأكاديمية.{% endblock %}
-{% block help_step %}بعد التسجيل، ستنتقل مباشرة إلى صفحة إدخال بيانات الثانوية.{% endblock %}
-
+{% block help_step %}بعد التسجيل، ستنتقل إلى صفحة تسجيل الدخول.{% endblock %}
 {% block content %}
 <div class="auth-container">
   <div class="auth-card">
@@ -23,7 +22,8 @@
         <label for="name">الاسم الكامل</label>
         <div class="input-wrapper">
           <i class="fas fa-user input-icon"></i>
-          <input type="text" id="name" name="name" placeholder="مثال: أحمد محمد" required autocomplete="name" autofocus>
+          <input type="text" id="name" name="name" placeholder="مثال: أحمد محمد" value="{{ name|default('') }}" required
+            autocomplete="name" autofocus>
         </div>
         <div class="error-message" id="name-error"></div>
       </div>
@@ -33,7 +33,8 @@
         <label for="email">البريد الإلكتروني</label>
         <div class="input-wrapper">
           <i class="fas fa-envelope input-icon"></i>
-          <input type="email" id="email" name="email" placeholder="example@email.com" required autocomplete="email">
+          <input type="email" id="email" name="email" placeholder="example@email.com" value="{{ email|default('') }}"
+            required autocomplete="email">
         </div>
         <div class="error-message" id="email-error"></div>
       </div>
@@ -43,7 +44,8 @@
         <label for="password">كلمة المرور</label>
         <div class="input-wrapper">
           <i class="fas fa-lock input-icon"></i>
-          <input type="password" id="password" name="password" placeholder="••••••••" required autocomplete="new-password">
+          <input type="password" id="password" name="password" placeholder="••••••••" required
+            autocomplete="new-password">
           <button type="button" class="toggle-password" id="togglePassword" aria-label="إظهار كلمة المرور">
             <i class="fas fa-eye"></i>
           </button>
@@ -226,9 +228,11 @@
     .auth-card {
       padding: 24px 20px;
     }
+
     .auth-header h1 {
       font-size: 1.5rem;
     }
+
     .input-wrapper input {
       padding: 10px 36px;
     }
@@ -236,85 +240,91 @@
 </style>
 
 <script>
-(function() {
-  // إظهار/إخفاء كلمة المرور
-  const togglePasswordBtn = document.getElementById('togglePassword');
-  const passwordInput = document.getElementById('password');
-  if (togglePasswordBtn && passwordInput) {
-    togglePasswordBtn.addEventListener('click', function() {
-      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordInput.setAttribute('type', type);
-      const icon = this.querySelector('i');
-      if (type === 'password') {
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-        this.setAttribute('aria-label', 'إظهار كلمة المرور');
-      } else {
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-        this.setAttribute('aria-label', 'إخفاء كلمة المرور');
-      }
-    });
-  }
-
-  // تحقق بسيط من صحة الحقول قبل الإرسال
-  const form = document.querySelector('.auth-form');
-  if (form) {
-    form.addEventListener('submit', function(e) {
-      const name = document.getElementById('name');
-      const email = document.getElementById('email');
-      const password = document.getElementById('password');
-      let valid = true;
-
-      // التحقق من الاسم
-      const nameError = document.getElementById('name-error');
-      if (name && nameError) {
-        if (name.value.trim().length === 0) {
-          nameError.textContent = 'يرجى إدخال الاسم الكامل.';
-          valid = false;
+  (function () {
+    // إظهار/إخفاء كلمة المرور
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    if (togglePasswordBtn && passwordInput) {
+      togglePasswordBtn.addEventListener('click', function () {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        const icon = this.querySelector('i');
+        if (type === 'password') {
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+          this.setAttribute('aria-label', 'إظهار كلمة المرور');
         } else {
-          nameError.textContent = '';
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+          this.setAttribute('aria-label', 'إخفاء كلمة المرور');
         }
-      }
+      });
+    }
 
-      // التحقق من البريد الإلكتروني
-      const emailError = document.getElementById('email-error');
-      if (email && emailError) {
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailPattern.test(email.value.trim())) {
-          emailError.textContent = 'يرجى إدخال بريد إلكتروني صحيح.';
-          valid = false;
-        } else {
-          emailError.textContent = '';
+    // تحقق بسيط من صحة الحقول قبل الإرسال
+    const form = document.querySelector('.auth-form');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        const name = document.getElementById('name');
+        const email = document.getElementById('email');
+        const password = document.getElementById('password');
+        let valid = true;
+
+        // التحقق من الاسم
+        const nameError = document.getElementById('name-error');
+        if (name && nameError) {
+          if (name.value.trim().length === 0) {
+            nameError.textContent = 'يرجى إدخال الاسم الكامل.';
+            valid = false;
+          } else {
+            nameError.textContent = '';
+          }
         }
-      }
 
-      // التحقق من كلمة المرور
-      const passwordError = document.getElementById('password-error');
-      if (password && passwordError) {
-        if (password.value.length < 6) {
-          passwordError.textContent = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.';
-          valid = false;
-        } else {
-          passwordError.textContent = '';
+        // التحقق من البريد الإلكتروني
+        const emailError = document.getElementById('email-error');
+        if (email && emailError) {
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailPattern.test(email.value.trim())) {
+            emailError.textContent = 'يرجى إدخال بريد إلكتروني صحيح.';
+            valid = false;
+          } else {
+            emailError.textContent = '';
+          }
         }
-      }
 
-      if (!valid) {
-        e.preventDefault();
-        return;
-      }
+        // ✅ التحقق من كلمة المرور (مطابق للسيرفر: 6 أحرف + رقم + حرف)
+        const passwordError = document.getElementById('password-error');
+        if (password && passwordError) {
+          if (password.value.length < 6) {
+            passwordError.textContent = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل.';
+            valid = false;
+          } else if (!/\d/.test(password.value)) {
+            passwordError.textContent = 'كلمة المرور يجب أن تحتوي على رقم واحد على الأقل.';
+            valid = false;
+          } else if (!/[a-zA-Z]/.test(password.value)) {
+            passwordError.textContent = 'كلمة المرور يجب أن تحتوي على حرف واحد على الأقل.';
+            valid = false;
+          } else {
+            passwordError.textContent = '';
+          }
+        }
 
-      // عرض حالة التحميل
-      const btnText = document.querySelector('.btn-text');
-      const btnLoader = document.querySelector('.btn-loader');
-      if (btnText && btnLoader) {
-        btnText.style.display = 'none';
-        btnLoader.style.display = 'inline-flex';
-        document.getElementById('registerBtn').disabled = true;
-      }
-    });
-  }
-})();
+        if (!valid) {
+          e.preventDefault();
+          return;
+        }
+
+        // عرض حالة التحميل
+        const btnText = document.querySelector('.btn-text');
+        const btnLoader = document.querySelector('.btn-loader');
+        if (btnText && btnLoader) {
+          btnText.style.display = 'none';
+          btnLoader.style.display = 'inline-flex';
+          document.getElementById('registerBtn').disabled = true;
+        }
+      });
+    }
+  })();
 </script>
 {% endblock %}

@@ -1,5 +1,5 @@
 # routes/university.py
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from utils.decorators import login_required
 from models.user import User
 from models.university import (
@@ -8,7 +8,7 @@ from models.university import (
 )
 from services.career_engine import CareerEngine
 from database import db
-import json
+
 
 
 university_bp = Blueprint('university', __name__)
